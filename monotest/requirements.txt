@@ -8,7 +8,9 @@ constantly==15.1.0
 cryptography==41.0.4
 daphne==4.0.0
 Django==4.2.5
+django-cors-headers==4.2.0
 djangorestframework==3.14.0
+gunicorn==21.2.0
 hyperlink==21.0.0
 idna==3.4
 incremental==22.10.0
