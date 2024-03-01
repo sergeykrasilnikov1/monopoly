@@ -1,0 +1,1210 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Game Field</title>
+<style>
+
+    .chip {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    position: absolute;
+    transition: transform 0.5s ease-in-out;
+}
+
+#chip1 { background-color: red; }
+#chip2 { background-color: #09ce09; }
+#chip3 { background-color: blue; }
+#chip4 { background-color: yellow; }
+
+body {
+    background-color: #262c2f;
+    user-select: none;
+}
+
+.text0 {
+    color: white;
+    font-size: 16px !important;
+}
+    .avatar-frame {
+            width: 100px;
+            height: 100px;
+            border: 2px solid #ccc; /* Border color */
+            border-radius: 50%; /* Makes it circular */
+            overflow: hidden; /* Hides overflow content (if any) */
+        }
+
+        .avatar {
+            width: 100%;
+            height: 100%;
+            object-fit: cover; /* Maintain aspect ratio */
+        }
+
+
+  .game-field {
+      position: relative;
+    margin: 0;
+    display: grid;
+    grid-template-columns: 140px repeat(9, 70px) 140px;
+    grid-template-rows: 140px repeat(9, 70px) 140px;
+  }
+
+  .box {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+      flex-direction: column;
+    grid-column: 2/11;
+    grid-row: 2/11;
+    background-color: #262c2f;
+      position: relative;
+  }
+  
+  .modal-btn {
+        padding: 10px 20px;
+      font-size: 20px;
+      color: #fff; /* Белый текст */
+      background: linear-gradient(to right, #8e0000, #00224d);
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      transition: background 0.3s ease;
+  }
+  
+  .modal-btn:hover {
+       background: linear-gradient(to right, #00224d, #8e0000);
+  }
+  
+  .oval {
+    width: 50px;
+  height: 30px;
+  border-radius: 15px;
+  background-color: #3498db;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+  color: #fff;
+  position: absolute;
+      transform: translate(20%, 20%) rotate(0deg);
+      opacity: 0.8;
+}
+  
+
+.number {
+  font-weight: bold;
+}
+
+  .chat {
+       overflow-y: auto;
+      width: 90%;
+      font-size: 20px;
+      padding: 20px;
+      color: white;
+      scroll-behavior: smooth; 
+  }
+
+  .div1 {
+    width: 100%;
+    height: 100%;
+    background-color: #fff;
+    border: 1px solid #000;
+  }
+
+  .container {
+    display: flex;
+    height: 100vh;
+    margin: 0;
+  }
+
+  .players {
+    display: flex;
+    flex-direction: column;
+    margin-right: 100px;
+  }
+
+  .player {
+    background-color: grey;
+    width: 200px;
+    height: 200px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    margin-bottom: 20px;
+  }
+
+  .buttons {
+      display: flex;
+      margin-bottom: 30px;
+  }
+
+  .deal {
+      background-color: black;
+  }
+
+  .Deal{
+      background-color: white;
+  }
+  
+  #deal {
+      height: 93%;
+  }
+
+  .dice {
+    width: 100px;
+    height: 100px;
+    border: 2px solid #000;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 2em;
+    font-weight: bold;
+    margin: 10px;
+}
+
+
+#rollButton {
+    font-size: 1.2em;
+    margin-bottom: 100px;
+}
+
+@keyframes roll {
+    0% { transform: rotate(0deg); }
+    25% { transform: rotate(90deg); }
+    50% { transform: rotate(180deg); }
+    75% { transform: rotate(270deg); }
+    100% { transform: rotate(360deg); }
+}
+
+.roll-animation {
+    animation: roll 1s ease-out;
+}
+
+.modal {
+    display: none;
+    position: absolute;
+    z-index: 1;
+    left: 0;
+    top: 0;
+    width: 93.5%;
+    height: 18%;
+    background-color: rgba(0, 0, 0, 0.5);
+}
+
+.modal-content {
+    background-color:  #262c2f;;
+    padding: 20px;
+    border: 1px solid #888;
+    width: 100%;
+    height: 100%;
+    text-align: center;
+}
+
+#winModel {
+    position: fixed;
+    width: 100%;
+    height: 100%;
+}
+
+.deal-container{
+    display: flex;
+    justify-content: space-between;
+}
+
+.deal-content{
+    text-align: center;
+}
+
+.deal-text {
+    display: flex;
+    flex-direction: column;
+}
+
+.deal-avatar{
+    width: 30px;
+    height: 30px;
+}
+
+.deal-money{
+    display: flex;
+    justify-content: space-around;
+}
+
+.deal-cash {
+    width: 40px;
+    height: 40px;
+}
+
+.close {
+    color: #aaa;
+    float: right;
+    font-size: 28px;
+    font-weight: bold;
+}
+
+.close:hover,
+.close:focus {
+    color: black;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+.element {
+    height: 100%;
+    position: relative;
+}
+
+.popup {
+    height: 80px;
+    width: 60px;
+    display: none;
+    position: absolute;
+    background-color: #f9f9f9;
+    padding: 10px;
+    border: 1px solid #ccc;
+    z-index: 1;
+    top: 20%; /* Располагаем окно над элементом */
+    left: 50%;
+    transform: translateX(-50%);
+}
+
+.popup.active {
+    display: block;
+}
+
+.container-img {
+
+}
+
+
+.price {
+    width: 100%;
+    display: block;
+    position: absolute;
+    top: -19px;
+    background-color: wheat;
+    text-align: center;
+}
+
+.price-left {
+    transform: rotate(270deg);
+    left: -47px;
+    top: 24px;
+    width: 75px;
+}
+
+.price-right {
+    transform: rotate(90deg);
+    right: -47px;
+    top: 25px;
+    width: 75px;
+}
+
+.price-bottom {
+    top: 140px;
+}
+
+.pink {
+    background-color: pink;
+}
+
+.red {
+    background-color: red;
+}
+
+.yellow {
+    background-color: yellow;
+}
+
+.aqua {
+    background-color: aqua;
+}
+
+.blue {
+    background-color: blue;
+}
+
+.green {
+    background-color: green;
+}
+
+.grey {
+    background-color: grey;
+}
+
+.purple {
+    background-color: purple;
+}
+
+.aquamarine {
+    background-color: aquamarine;
+}
+
+.dices-wrapper {
+    width: 50%;
+    display: flex;
+    justify-content: space-around;
+    margin-bottom: 20px;
+}
+
+.star {
+    font-size: 2em; /* Устанавливаем размер звезды */
+    color: gold;   /* Устанавливаем цвет звезды */
+}
+
+.company-img {
+    transform: rotate(90deg);
+}
+
+.cell-img {
+    background-size: 140px 70px;
+}
+
+.cell-img-rotate{
+    background-size: 70px 140px;
+}
+
+.rotate {
+    transform: rotate(90deg);
+}
+
+#dice {
+    width: 90px;
+    height: 90px;
+    transform-style: preserve-3d;
+    transition: transform 1.5s ease-out;
+}
+
+#dice:hover {
+  cursor: pointer;
+}
+
+.sides{
+    background-color: #EFE5DC;
+    display: block;
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    box-shadow: inset 0 0 5px rgba(0,0,0,0.25);
+}
+
+.dot {
+    display: block;
+    position: absolute;
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    background-color: black;
+    transform: translate(-50%, -50%);
+}
+
+.menu {
+    text-align: center;
+}
+
+#casino {
+    height: 100%;
+}
+
+#deal-suggest {
+    height: 100%;
+}
+
+
+.side-1 .dot-1 { top: 50%; left: 50%; }
+
+.side-2 .dot-1 { top: 25%; left: 25%; }
+.side-2 .dot-2 { top: 75%; left: 75%; }
+
+.side-3 .dot-1 { top: 25%; left: 25%; }
+.side-3 .dot-2 { top: 75%; left: 75%; }
+.side-3 .dot-3 { top: 50%; left: 50%; }
+
+.side-4 .dot-1 { top: 25%; left: 25%; }
+.side-4 .dot-2 { top: 25%; left: 75%; }
+.side-4 .dot-3 { top: 75%; left: 25%; }
+.side-4 .dot-4 { top: 75%; left: 75%; }
+
+.side-5 .dot-1 { top: 25%; left: 25%; }
+.side-5 .dot-2 { top: 25%; left: 75%; }
+.side-5 .dot-3 { top: 75%; left: 25%; }
+.side-5 .dot-4 { top: 75%; left: 75%; }
+.side-5 .dot-5 { top: 50%; left: 50%; }
+
+.side-6 .dot-1 { top: 25%; left: 25%; }
+.side-6 .dot-2 { top: 25%; left: 75%; }
+.side-6 .dot-3 { top: 75%; left: 25%; }
+.side-6 .dot-4 { top: 75%; left: 75%; }
+.side-6 .dot-5 { top: 50%; left: 25%; }
+.side-6 .dot-6 { top: 50%; left: 75%; }
+
+#dice .side-1 {
+  transform: translateZ(45px);
+}
+#dice .side-2 {
+  transform: rotateX(-180deg) translateZ(45px);
+}
+#dice .side-3 {
+  transform: rotateY(90deg) translateZ(45px);
+}
+#dice .side-4 {
+  transform: rotateY(-90deg) translateZ(45px);
+}
+#dice .side-5 {
+  transform: rotateX(90deg) translateZ(45px);
+}
+#dice .side-6 {
+  transform: rotateX(-90deg) translateZ(45px);
+}
+
+#dice[data-side="1"] {
+    transform: rotateX(360deg) rotateY(360deg) rotateZ(720deg);
+}
+#dice[data-side="2"] {
+    transform: rotateX(360deg) rotateY(540deg) rotateZ(720deg);
+}
+#dice[data-side="3"] {
+    transform: rotateX(360deg) rotateY(630deg) rotateZ(720deg);
+}
+#dice[data-side="4"] {
+    transform: rotateX(360deg) rotateY(450deg) rotateZ(720deg);
+}
+#dice[data-side="5"] {
+    transform: rotateX(630deg) rotateY(360deg) rotateZ(720deg);
+}
+#dice[data-side="6"] {
+    transform: rotateX(450deg) rotateY(360deg) rotateZ(720deg);
+}
+
+#dice[data-side="1"].reRoll {
+    transform: rotateX(0deg) rotateY(0deg) rotateZ(0deg);
+}
+#dice[data-side="2"].reRoll {
+    transform: rotateX(0deg) rotateY(180deg) rotateZ(0deg);
+}
+#dice[data-side="3"].reRoll {
+    transform: rotateX(0deg) rotateY(270deg) rotateZ(0deg);
+}
+#dice[data-side="4"].reRoll {
+    transform: rotateX(0deg) rotateY(90deg) rotateZ(0deg);
+}
+#dice[data-side="5"].reRoll {
+    transform: rotateX(270deg) rotateY(0deg) rotateZ(0deg);
+}
+#dice[data-side="6"].reRoll {
+    transform: rotateX(90deg) rotateY(0deg) rotateZ(0deg);
+}
+
+#diceResult{
+	position: absolute;
+	bottom: 20px;
+	left: 50%;
+	transform: translateX(-50%);
+	background-color: #EE4E34;
+	color: white;
+	font-weight: bold;
+	padding: 0.5rem 1rem;
+	border-radius: 0.25rem;
+	box-shadow: 0 0 5px rgba(0, 0, 0, 0.25);
+}
+
+#diceResult.hide{
+	opacity: 0;
+}
+
+#diceResult.reveal{
+	animation: fadeUp 0.3s forwards;
+}
+
+@keyframes fadeUp {
+	0% {
+		opacity: 0;
+		bottom: 0;
+	}
+
+	100% {
+		opacity: 1;
+		bottom: 20px;
+	}
+}
+
+#player0{
+    background-color: red;
+}
+
+#player1{
+    background-color: green;
+}
+
+#player2{
+    background-color: blue;
+}
+
+#player3{
+    background-color: yellow;
+}
+
+input:focus {
+  border: none;
+    outline: none/* Убираем границу при фокусировке */
+  /* Дополнительные стили, если необходимо */
+}
+
+.chat-input {
+    width: 90%;
+    background-color: #262c2f;
+    color: white;
+    font-size: 20px;
+    border: none;
+    margin-top: auto;
+    padding: 20px;
+    overflow: auto;
+}
+
+
+
+</style>
+</head>
+<body>
+{% block content %}
+  <h1>Players in Room {{ room.players_count }}</h1>
+ 
+{% endblock %}
+    <button class="btn">test</button>
+    <div class="color">{{ request.user.color }}</div>{{ player_turn }}
+    <div class="container">
+        <div class="players">
+            <div class="player" id="player0">
+            <div class="avatar-frame"> <img class="avatar" src="../../static/front/images/images.jpeg" alt="Avatar"> </div>
+            <span>{{ player }}</span>
+            <span>{{ player.active }}</span>
+            <span></span>
+            </div>
+             <div class="player" id="player1">
+            <div class="avatar-frame"> <img class="avatar" src="../../static/front/images/images.jpeg" alt="Avatar"> </div>
+            <span>{{ player }}</span>
+            <span>{{ player.active }}</span>
+            <span></span>
+            </div>
+            {% if room.players_count > 2 %}
+             <div class="player" id="player2">
+            <div class="avatar-frame"> <img class="avatar" src="../../static/front/images/images.jpeg" alt="Avatar"> </div>
+            <span>{{ player }}</span>
+            <span>{{ player.active }}</span>
+            <span></span>
+            </div>
+            {% endif %}
+            {% if room.players_count > 3 %}
+             <div class="player" id="player3">
+            <div class="avatar-frame"> <img class="avatar" src="../../static/front/images/images.jpeg" alt="Avatar"> </div>
+            <span>{{ player }}</span>
+            <span>{{ player.active }}</span>
+            <span></span>
+            </div>
+            {% endif %}
+{#            {% for player in room.user_set.all %}#}
+{#            <div class="player" id="player{{ player.color }}">#}
+{#            <div class="avatar-frame"> <img class="avatar" src="../../static/front/images/images.jpeg" alt="Avatar"> </div>#}
+{#            <span>{{ player }}</span>#}
+{#            <span>{{ player.active }}</span>#}
+{#            <span></span>#}
+{#            </div>#}
+{#            {% endfor %}#}
+        </div>
+
+        <div class="game-field">
+        <div class="chip" id="chip1"></div>
+    <div class="chip" id="chip2" style="left: 60px"></div>
+    <div class="chip" id="chip3" style="left: 60px; top: 60px"></div>
+    <div class="chip" id="chip4" style="top: 60px"></div>
+	<div name='Пятёрочка' class="div1 special-cell" id="cell0" style="left: 11px; top: 14px; border: 1px solid rgba(0, 0, 0, 0.75);">
+        <span class="text0" style="top: 21px; left: 6px; font-size: 12px; line-height: 14px;">Старт</span>
+        <div class="element">
+            <div class="popup">
+                <span>$</span>
+                <button class="build-permit">OK</button>
+            </div>
+            </div>
+  </div>
+	<div class="div1" id="cell1" style=" background-color: white; left: 66px; top:14px; border: 1px solid rgba(0, 0, 0, 0.75);">
+		<span class="text0" style="display: none; top: 10px; left:6px;text-align: center; font-size: 10px; line-height: 11px;">Старая дорога</span>
+            <div style="background-image: url('../../static/front/images/Логотип_«Пятёрочка» rotated.svg');" class="element cell-img-rotate">
+            <div class="popup">
+                <span>$</span>
+            </div>
+                <div class="price pink"> <span class="text0" style="top: 36px; left: 13px;font-size: 10px; line-height: 11px;">200$</span></div>
+            </div>
+	</div>
+	<div class="div1 special-cell" id="cell2" style="left: 121px; top: 14px; background: rgba(97, 97, 97, 0.3); border: 1px solid rgba(0, 0, 0, 0.75);">
+        <img class="container-img" src="../../static/front/images/container_flip.png" alt="container">
+	</div>
+	<div class="div1" id="cell3" style=" background-color: white; left: 66px; top:14px; border: 1px solid rgba(0, 0, 0, 0.75);">
+		<span class="text0" style="display: none; top: 10px; left:6px;text-align: center; font-size: 10px; line-height: 11px;">Старая дорога</span>
+            <div style="background-image: url('../../static/front/images/Логотип_«Пятёрочка» rotated.svg');" class="element cell-img-rotate">
+            <div class="popup">
+                <span>$</span>
+                <button class="build-permit">OK</button>
+
+            </div>
+            <div class="price pink"> <span class="text0" style="top: 36px; left: 13px;font-size: 10px; line-height: 11px;">200$</span></div>
+
+            </div>
+	</div>
+	<div class="div1" id="cell4" style=" background-color: white; left: 66px; top:14px; border: 1px solid rgba(0, 0, 0, 0.75);">
+		<span class="text0" style="display: none; top: 10px; left:6px;text-align: center; font-size: 10px; line-height: 11px;">Старая дорога</span>
+            <div style="background-image: url('../../static/front/images/Логотип_«Пятёрочка» rotated.svg');" class="element cell-img-rotate">
+            <div class="popup">
+                <span>$</span>
+                <button class="build-permit">OK</button>
+            </div>
+            <div class="price"> <span class="text0" style="top: 36px; left: 13px;font-size: 10px; line-height: 11px;">200$</span></div>
+            </div>
+	</div>
+	<div class="div1" id="cell5" style=" background-color: white; left: 66px; top:14px; border: 1px solid rgba(0, 0, 0, 0.75);">
+		<span class="text0" style="display: none; top: 10px; left:6px;text-align: center; font-size: 10px; line-height: 11px;">Старая дорога</span>
+            <div style="background-image: url('../../static/front/images/Логотип_«Пятёрочка» rotated.svg');" class="element cell-img-rotate">
+            <div class="popup">
+                <span>$</span>
+                <button class="build-permit">OK</button>
+            </div>
+            <div class="price red"> <span class="text0" style="top: 36px; left: 13px;font-size: 10px; line-height: 11px;">200$</span></div>
+            </div>
+	</div>
+	<div class="div1" id="cell6" style=" background-color: white; left: 66px; top:14px; border: 1px solid rgba(0, 0, 0, 0.75);">
+		<span class="text0" style="display: none; top: 10px; left:6px;text-align: center; font-size: 10px; line-height: 11px;">Старая дорога</span>
+            <div style="background-image: url('../../static/front/images/Логотип_«Пятёрочка» rotated.svg');" class="element cell-img-rotate">
+            <div class="popup">
+                <span>$</span>
+                <button class="build-permit">OK</button>
+            </div>
+            <div class="price yellow"> <span class="text0" style="top: 36px; left: 13px;font-size: 10px; line-height: 11px;">200$</span></div>
+            </div>
+	</div>
+	<div class="div1 special-cell" id="cell7" style="left: 121px; top: 80px; background: rgba(245, 245, 245, 0.2); border: 1px solid rgba(0, 0, 0, 0.75);">
+        <img class="container-img" src="../../static/front/images/container_flip.png" alt="container">
+	</div>
+	<div class="div1" id="cell8" style=" background-color: white; left: 66px; top:14px; border: 1px solid rgba(0, 0, 0, 0.75);">
+		<span class="text0" style="display: none; top: 10px; left:6px;text-align: center; font-size: 10px; line-height: 11px;">Старая дорога</span>
+            <div style="background-image: url('../../static/front/images/Логотип_«Пятёрочка» rotated.svg');" class="element cell-img-rotate">
+            <div class="popup">
+                <span>$</span>
+                <button class="build-permit">OK</button>
+            </div>
+            <div class="price yellow"> <span class="text0" style="top: 36px; left: 13px;font-size: 10px; line-height: 11px;">200$</span></div>
+            </div>
+	</div>
+	<div class="div1" id="cell9" style=" background-color: white; left: 66px; top:14px; border: 1px solid rgba(0, 0, 0, 0.75);">
+		<span class="text0" style="display: none; top: 10px; left:6px;text-align: center; font-size: 10px; line-height: 11px;">Старая дорога</span>
+            <div style="background-image: url('../../static/front/images/Логотип_«Пятёрочка» rotated.svg');" class="element cell-img-rotate">
+            <div class="popup">
+                <span>$</span>
+                <button class="build-permit">OK</button>
+            </div>
+            <div class="price yellow"> <span class="text0" style="top: 36px; left: 13px;font-size: 10px; line-height: 11px;">200$</span></div>
+            </div>
+	</div>
+	<div class="div1 special-cell" id="cell10" style="left: 11px; top: 146px; background: rgba(174, 180, 181, 0.4); border: 1px solid rgba(0, 0, 0, 0.75);">
+	  <img class="container-img" src="../../static/front/images/zek.png" alt="container">
+	</div>
+	<div class="div1" id="cell39" style=" background-color: rgba(255,255,255,0.83); left: 66px; top:14px; border: 1px solid rgba(0, 0, 0, 0.75);">
+		<span class="text0" style="display: none; top: 10px; left:6px;text-align: center; font-size: 10px; line-height: 11px;">Старая дорога</span>
+            <div style="background-image: url('../../static/front/images/Tatneft_Logo.svg')" class="element cell-img">
+            <div class="popup">
+                <span>$</span>
+                <button class="build-permit">OK</button>
+            </div>
+            <div class="price price-left grey"> <span class="text0" style="top: 36px; left: 13px;font-size: 10px; line-height: 11px;">200$</span></div>
+            </div>
+	</div>
+	<div class="div1" id="cell11" style=" background-color: white; left: 66px; top:14px; border: 1px solid rgba(0, 0, 0, 0.75);">
+		<span class="text0" style="display: none; top: 10px; left:6px;text-align: center; font-size: 10px; line-height: 11px;">Старая дорога</span>
+            <div style="background-image: url('../../static/front/images/Логотип_«Пятёрочка».svg')" class="element cell-img">
+            <div class="popup">
+                <span>$</span>
+                <button class="build-permit">OK</button>
+            </div>
+            <div class="price price-right aqua"> <span class="text0" style="top: 36px; left: 13px;font-size: 10px; line-height: 11px;">200$</span></div>
+            </div>
+	</div>
+	<div class="div1 special-cell" id="cell38" style="left: 176px; top: 146px; background: rgba(235, 216, 199, 0.4); border: 1px solid rgba(0, 0, 0, 0.75);">
+	  <img class="container-img" src="../../static/front/images/container.png" alt="container">
+	</div>
+	<div class="div1" id="cell12" style=" background-color: white; left: 66px; top:14px; border: 1px solid rgba(0, 0, 0, 0.75);">
+		<span class="text0" style="display: none; top: 10px; left:6px;text-align: center; font-size: 10px; line-height: 11px;">Старая дорога</span>
+            <div style="background-image: url('../../static/front/images/Логотип_«Пятёрочка».svg')" class="element cell-img">
+            <div class="popup">
+                <span>$</span>
+                <button class="build-permit">OK</button>
+            </div>
+            <div class="price price-right"> <span class="text0" style="top: 36px; left: 13px;font-size: 10px; line-height: 11px;">200$</span></div>
+            </div>
+	</div>
+	<div class="div1" id="cell37" style=" background-color: white; left: 66px; top:14px; border: 1px solid rgba(0, 0, 0, 0.75);">
+		<span class="text0" style="display: none; top: 10px; left:6px;text-align: center; font-size: 10px; line-height: 11px;">Старая дорога</span>
+            <div style="background-image: url('../../static/front/images/Логотип_«Пятёрочка».svg')" class="element cell-img">
+            <div class="popup">
+                <span>$</span>
+                <button class="build-permit">OK</button>
+            </div>
+            <div class="price price-left grey"> <span class="text0" style="top: 36px; left: 13px;font-size: 10px; line-height: 11px;">200$</span></div>
+            </div>
+	</div>
+	<div class="div1" id="cell13" style=" background-color: white; left: 66px; top:14px; border: 1px solid rgba(0, 0, 0, 0.75);">
+		<span class="text0" style="display: none; top: 10px; left:6px;text-align: center; font-size: 10px; line-height: 11px;">Старая дорога</span>
+            <div style="background-image: url('../../static/front/images/Логотип_«Пятёрочка».svg')" class="element cell-img">
+            <div class="popup">
+                <span>$</span>
+                <button class="build-permit">OK</button>
+            </div>
+            <div class="price price-right aqua"> <span class="text0" style="top: 36px; left: 13px;font-size: 10px; line-height: 11px;">200$</span></div>
+            </div>
+	</div>
+	<div class="div1" id="cell36" style=" background-color: white; left: 66px; top:14px; border: 1px solid rgba(0, 0, 0, 0.75);">
+		<span class="text0" style="display: none; top: 10px; left:6px;text-align: center; font-size: 10px; line-height: 11px;">Старая дорога</span>
+            <div style="background-image: url('../../static/front/images/Логотип_«Пятёрочка».svg')" class="element cell-img">
+            <div class="popup">
+                <span>$</span>
+                <button class="build-permit">OK</button>
+            </div>
+            <div class="price price-left"> <span class="text0" style="top: 36px; left: 13px;font-size: 10px; line-height: 11px;">200$</span></div>
+            </div>
+	</div>
+	<div class="div1" id="cell14" style=" background-color: white; left: 66px; top:14px; border: 1px solid rgba(0, 0, 0, 0.75);">
+		<span class="text0" style="display: none; top: 10px; left:6px;text-align: center; font-size: 10px; line-height: 11px;">Старая дорога</span>
+            <div style="background-image: url('../../static/front/images/Логотип_«Пятёрочка».svg')" class="element cell-img">
+            <div class="popup">
+                <span>$</span>
+                <button class="build-permit">OK</button>
+            </div>
+            <div class="price price-right aqua"> <span class="text0" style="top: 36px; left: 13px;font-size: 10px; line-height: 11px;">200$</span></div>
+            </div>
+	</div>
+	<div class="div1" id="cell35" style=" background-color: white; left: 66px; top:14px; border: 1px solid rgba(0, 0, 0, 0.75);">
+		<span class="text0" style="display: none; top: 10px; left:6px;text-align: center; font-size: 10px; line-height: 11px;">Старая дорога</span>
+            <div style="background-image: url('../../static/front/images/Логотип_«Пятёрочка».svg')" class="element cell-img">
+            <div class="popup">
+                <span>$</span>
+                <button class="build-permit">OK</button>
+            </div>
+            <div class="price price-left red"> <span class="text0" style="top: 36px; left: 13px;font-size: 10px; line-height: 11px;">200$</span></div>
+            </div>
+	</div>
+	<div class="div1" id="cell15" style=" background-color: white; left: 66px; top:14px; border: 1px solid rgba(0, 0, 0, 0.75);">
+		<span class="text0" style="display: none; top: 10px; left:6px;text-align: center; font-size: 10px; line-height: 11px;">Старая дорога</span>
+            <div style="background-image: url('../../static/front/images/Логотип_«Пятёрочка».svg')" class="element cell-img">
+            <div class="popup">
+                <span>$</span>
+                <button class="build-permit">OK</button>
+            </div>
+                <div class="price price-right red"> <span class="text0" style="top: 36px; left: 13px;font-size: 10px; line-height: 11px;">200$</span></div>
+            </div>
+	</div>
+	<div class="div1" id="cell34" style=" background-color: white; left: 66px; top:14px; border: 1px solid rgba(0, 0, 0, 0.75);">
+		<span class="text0" style="display: none; top: 10px; left:6px;text-align: center; font-size: 10px; line-height: 11px;">Старая дорога</span>
+            <div style="background-image: url('../../static/front/images/Логотип_«Пятёрочка».svg')" class="element cell-img">
+            <div class="popup">
+                <span>$</span>
+                <button class="build-permit">OK</button>
+            </div>
+            <div class="price price-left purple"> <span class="text0" style="top: 36px; left: 13px;font-size: 10px; line-height: 11px;">200$</span></div>
+            </div>
+	</div>
+	<div class="div1" id="cell16" style=" background-color: white; left: 66px; top:14px; border: 1px solid rgba(0, 0, 0, 0.75);">
+		<span class="text0" style="display: none; top: 10px; left:6px;text-align: center; font-size: 10px; line-height: 11px;">Старая дорога</span>
+            <div style="background-image: url('../../static/front/images/Логотип_«Пятёрочка».svg')" class="element cell-img">
+            <div class="popup">
+                <span>$</span>
+                <button class="build-permit">OK</button>
+            </div>
+            <div class="price price-right blue"> <span class="text0" style="top: 36px; left: 13px;font-size: 10px; line-height: 11px;">200$</span></div>
+            </div>
+	</div>
+	<div class="div1 special-cell"  id="cell33" style="left: 176px; top: 278px; background: rgba(245, 245, 245, 0.2); border: 1px solid rgba(0, 0, 0, 0.75);">
+	  <img class="container-img" src="../../static/front/images/container.png" alt="container">
+	</div>
+	<div class="div1 special-cell" id="cell17" style="left: 231px; top: 278px; background: rgba(0, 0, 0, 0.3); border: 1px solid rgba(0, 0, 0, 0.75);">
+        <img class="container-img" src="../../static/front/images/container.png" alt="container">
+	</div>
+	<div class="div1" id="cell32" style=" background-color: white; left: 66px; top:14px; border: 1px solid rgba(0, 0, 0, 0.75);">
+		<span class="text0" style="display: none; top: 10px; left:6px;text-align: center; font-size: 10px; line-height: 11px;">Старая дорога</span>
+            <div style="background-image: url('../../static/front/images/Логотип_«Пятёрочка».svg')" class="element cell-img">
+            <div class="popup">
+                <span>$</span>
+                <button class="build-permit">OK</button>
+            </div>
+            <div class="price price-left purple"> <span class="text0" style="top: 36px; left: 13px;font-size: 10px; line-height: 11px;">200$</span></div>
+            </div>
+	</div>
+	<div class="div1" id="cell18" style=" background-color: white; left: 66px; top:14px; border: 1px solid rgba(0, 0, 0, 0.75);">
+		<span class="text0" style="display: none; top: 10px; left:6px;text-align: center; font-size: 10px; line-height: 11px;">Старая дорога</span>
+            <div style="background-image: url('../../static/front/images/Логотип_«Пятёрочка».svg')" class="element cell-img">
+            <div class="popup">
+                <span>$</span>
+                <button class="build-permit">OK</button>
+            </div>
+            <div class="price price-right blue"> <span class="text0" style="top: 36px; left: 13px;font-size: 10px; line-height: 11px;">200$</span></div>
+            </div>
+	</div>
+	<div class="div1" id="cell31" style=" background-color: white; left: 66px; top:14px; border: 1px solid rgba(0, 0, 0, 0.75);">
+		<span class="text0" style="display: none; top: 10px; left:6px;text-align: center; font-size: 10px; line-height: 11px;">Старая дорога</span>
+            <div style="background-image: url('../../static/front/images/Логотип_«Пятёрочка».svg')" class="element cell-img">
+            <div class="popup">
+                <span>$</span>
+                <button class="build-permit">OK</button>
+            </div>
+            <div class="price price-left purple" > <span class="text0" style="top: 36px; left: 13px;font-size: 10px; line-height: 11px;">200$</span></div>
+            </div>
+	</div>
+	<div class="div1" id="cell19" style=" background-color: white; left: 66px; top:14px; border: 1px solid rgba(0, 0, 0, 0.75);">
+		<span class="text0" style="display: none; top: 10px; left:6px;text-align: center; font-size: 10px; line-height: 11px;">Старая дорога</span>
+            <div style="background-image: url('../../static/front/images/Логотип_«Пятёрочка».svg')" class="element cell-img">
+            <div class="popup">
+                <span>$</span>
+                <button class="build-permit">OK</button>
+            </div>
+            <div class="price price-right blue"> <span class="text0" style="top: 36px; left: 13px;font-size: 10px; line-height: 11px;">200$</span></div>
+            </div>
+	</div>
+	<div class="div1 special-cell" id="cell30" style="left: 231px; top: 344px; background: rgba(245, 245, 245, 0.2); border: 1px solid rgba(0, 0, 0, 0.75);">
+	  <img class="container-img" src="../../static/front/images/police.webp" alt="container">
+        <div class="element">
+            <div class="popup">
+                <span>$</span>
+                <button class="build-permit">OK</button>
+            </div>
+            </div>
+	</div>
+	<div class="div1" id="cell29" style=" background-color: white; left: 66px; top:14px; border: 1px solid rgba(0, 0, 0, 0.75);">
+		<span class="text0" style="display: none; top: 10px; left:6px;text-align: center; font-size: 10px; line-height: 11px;">Старая дорога</span>
+            <div style="background-image: url('../../static/front/images/Логотип_«Пятёрочка» rotated.svg');" class="element cell-img-rotate">
+            <div class="popup">
+                <span>$</span>
+                <button class="build-permit">OK</button>
+            </div>
+            <div class="price price-bottom aquamarine"> <span class="text0" style="top: 36px; left: 13px;font-size: 10px; line-height: 11px;">200$</span></div>
+            </div>
+	</div>
+	<div class="div1" id="cell28" style=" background-color: white; left: 66px; top:14px; border: 1px solid rgba(0, 0, 0, 0.75);">
+		<span class="text0" style="display: none; top: 10px; left:6px;text-align: center; font-size: 10px; line-height: 11px;">Старая дорога</span>
+            <div style="background-image: url('../../static/front/images/Логотип_«Пятёрочка» rotated.svg');" class="element cell-img-rotate">
+            <div class="popup">
+                <span>$</span>
+                <button class="build-permit">OK</button>
+            </div>
+            <div class="price price-bottom"> <span class="text0" style="top: 36px; left: 13px;font-size: 10px; line-height: 11px;">200$</span></div>
+            </div>
+	</div>
+	<div class="div1" id="cell27" style=" background-color: white; left: 66px; top:14px; border: 1px solid rgba(0, 0, 0, 0.75);">
+		<span class="text0" style="display: none; top: 10px; left:6px;text-align: center; font-size: 10px; line-height: 11px;">Старая дорога</span>
+            <div style="background-image: url('../../static/front/images/Логотип_«Пятёрочка» rotated.svg');" class="element cell-img-rotate">
+            <div class="popup">
+                <span>$</span>
+                <button class="build-permit">OK</button>
+            </div>
+            <div class="price price-bottom aquamarine"> <span class="text0" style="top: 36px; left: 13px;font-size: 10px; line-height: 11px;">200$</span></div>
+            </div>
+	</div>
+      <div class="div1" id="cell26" style=" background-color: white; left: 66px; top:14px; border: 1px solid rgba(0, 0, 0, 0.75);">
+		<span class="text0" style="display: none; top: 10px; left:6px;text-align: center; font-size: 10px; line-height: 11px;">Старая дорога</span>
+            <div style="background-image: url('../../static/front/images/Логотип_«Пятёрочка» rotated.svg');" class="element cell-img-rotate">
+            <div class="popup">
+                <span>$</span>
+                <button class="build-permit">OK</button>
+            </div>
+                <div class="price price-bottom aquamarine"> <span class="text0" style="top: 36px; left: 13px;font-size: 10px; line-height: 11px;">200$</span></div>
+            </div>
+	</div>
+      <div class="div1" id="cell25" style=" background-color: white; left: 66px; top:14px; border: 1px solid rgba(0, 0, 0, 0.75);">
+		<span class="text0" style="display: none; top: 10px; left:6px;text-align: center; font-size: 10px; line-height: 11px;">Старая дорога</span>
+            <div style="background-image: url('../../static/front/images/Логотип_«Пятёрочка» rotated.svg');" class="element cell-img-rotate">
+            <div class="popup">
+                <span>$</span>
+                <button class="build-permit">OK</button>
+            </div>
+                <div class="price price-bottom red"> <span class="text0" style="top: 36px; left: 13px;font-size: 10px; line-height: 11px;">200$</span></div>
+            </div>
+	</div>
+     <div class="div1" id="cell24" style=" background-color: white; left: 66px; top:14px; border: 1px solid rgba(0, 0, 0, 0.75);">
+		<span class="text0" style="display: none; top: 10px; left:6px;text-align: center; font-size: 10px; line-height: 11px;">Старая дорога</span>
+            <div style="background-image: url('../../static/front/images/Логотип_«Пятёрочка» rotated.svg');" class="element cell-img-rotate">
+            <div class="popup">
+                <span>$</span>
+                <button class="build-permit">OK</button>
+            </div>
+                <div class="price price-bottom green"> <span class="text0" style="top: 36px; left: 13px;font-size: 10px; line-height: 11px;">200$</span></div>
+            </div>
+	</div>
+          <div class="div1" id="cell23" style=" background-color: white; left: 66px; top:14px; border: 1px solid rgba(0, 0, 0, 0.75);">
+		<span class="text0" style="display: none; top: 10px; left:6px;text-align: center; font-size: 10px; line-height: 11px;">Старая дорога</span>
+            <div style="background-image: url('../../static/front/images/Логотип_«Пятёрочка» rotated.svg');" class="element cell-img-rotate">
+            <div class="popup">
+                <span>$</span>
+                <button class="build-permit">OK</button>
+            </div>
+                <div class="price price-bottom green"> <span class="text0" style="top: 36px; left: 13px;font-size: 10px; line-height: 11px;">200$</span></div>
+            </div>
+	</div>
+        <div class="div1 special-cell" id="cell22" style="left: 121px; top: 410px;  border: 1px solid rgba(0, 0, 0, 0.75);">
+        <img class="container-img" src="../../static/front/images/container_flip.png" alt="container">
+	</div>
+       <div class="div1" id="cell21" style=" background-color: white; left: 66px; top:14px; border: 1px solid rgba(0, 0, 0, 0.75);">
+		<span class="text0" style="display: none; top: 10px; left:6px;text-align: center; font-size: 10px; line-height: 11px;">Старая дорога</span>
+            <div style="background-image: url('../../static/front/images/Логотип_«Пятёрочка» rotated.svg');" class="element cell-img-rotate">
+            <div class="popup">
+                <span>$</span>
+                <button class="build-permit">OK</button>
+            </div>
+                <div class="price price-bottom green"> <span class="text0" style="top: 36px; left: 13px;font-size: 10px; line-height: 11px;">200$</span></div>
+            </div>
+	</div>
+        <div class="div1 special-cell" id="cell20" style="left: 121px; top: 410px; background: rgba(223, 223, 223, 0.4); border: 1px solid rgba(0, 0, 0, 0.75);">
+       <img class="container-img" src="../../static/front/images/cazino.jpg" alt="container">
+	</div>
+
+	<a class="menu__item back" style="top:459px; left: 261px;" href="#">
+{#		<img src="image/back.svg">#}
+	</a>
+        <div class="box">
+            <div id="gameTime"></div>
+            <div id="winModel" class="modal">
+                <div class="modal-content">
+                    <h3>Игра окончена</h3>
+                    <span>победил кто-то</span>
+                </div>
+            </div>
+            <div id="myModal" class="modal">
+                <div class="modal-content">
+                    <button class="modal-btn" id="buy">купить</button>
+                    <button class="modal-btn" id="btn-auction">аукцион</button>
+                </div>
+            </div>
+            <div id="modal-pay" class="modal">
+                <div class="modal-content">
+                    <button class="pay-btn modal-btn">оплатить</button>
+                </div>
+            </div>
+            <div id="myModal2" class="modal">
+                <div class="modal-content">
+                    <span class="close">&times;</span>
+                    <span>выберите хуйню</span>
+                </div>
+            </div>
+            <div id="auction" class="modal">
+                <div class="modal-content">
+                    <span class="close">&times;</span>
+                    <h2>На аукционе <span class="auction-name"></span></h2>
+                    <span class="auction-price"></span>
+                    <button class="auction-succes">Поднять на 100</button>
+                    <button class="auction-cancel">Отказаться</button>
+                </div>
+            </div>
+             <div id="deal" class="modal">
+                <div class="modal-content deal-content">
+                    <span class="close deal-close">&times;</span>
+                    <h2 class="deal-title"> договор</h2>
+                    <div class="deal-container">
+                        <div class="deal_user">
+                            <img class="deal-avatar" src="../../static/front/images/images.jpeg" alt="#">
+                            <div class="deal-text">
+                                <span>Вы</span>
+                                <span>предлагаете</span>
+                            </div>
+
+                            <img class="deal-cash" src="../../static/front/images/cash1.svg" alt="#">
+                            <input id="deal-input1" type="text">
+                            <div class="deal-company">
+                            </div>
+                    </div>
+                    <div class="deal_user">
+                        <img class="deal-avatar" src="../../static/front/images/images.jpeg" alt="#">
+                        <div class="deal-text">
+                                <span class="deal-enemy">Вы</span>
+                                <span>предлагаете</span>
+                        </div>
+                        <img class="deal-cash" src="../../static/front/images/cash1.svg" alt="#">
+                        <input id="deal-input2" type="text">
+                        <div class="deal-company">
+                        </div>
+                    </div>
+
+                    </div>
+                     <div class="deal-money">
+                            <span class="deal-money-left">0</span>
+                            <span>Общая сумма</span>
+                            <span class="deal-money-right">0</span>
+                        </div>
+                        <button class="deal-btn">Предложить</button>
+                </div>
+            </div>
+             <div id="deal-suggest" class="modal">
+                <div class="modal-content deal-content">
+                    <span class="close deal-close">&times;</span>
+                    <h2 class="deal-title"> договор</h2>
+                    <div class="deal-container">
+                        <div class="deal_user">
+                            <img class="deal-avatar" src="../../static/front/images/images.jpeg" alt="#">
+                            <div class="deal-text">
+                                <span>Вы</span>
+                                <span>предлагаете</span>
+                            </div>
+
+                            <img class="deal-cash" src="../../static/front/images/cash1.svg" alt="#">
+                            <span class="deal-suggest-money"></span>
+                            <div class="deal-company">
+                            </div>
+                    </div>
+                    <div class="deal_user">
+                        <img class="deal-avatar" src="../../static/front/images/images.jpeg" alt="#">
+                        <div class="deal-text">
+                                <span class="deal-enemy">Вы</span>
+                                <span>предлагаете</span>
+                        </div>
+                        <img class="deal-cash" src="../../static/front/images/cash1.svg" alt="#">
+                        <span class="deal-suggest-money"></span>
+                        <div class="deal-company">
+                        </div>
+                    </div>
+
+                    </div>
+                     <div class="deal-money">
+                            <span class="deal-money-left">0</span>
+                            <span>Общая сумма</span>
+                            <span class="deal-money-right">0</span>
+                        </div>
+                        <button class="deal-accept">принять</button>
+                </div>
+            </div>
+            <div id="casino" class="modal">
+                <div class="modal-content">
+                    <span>выберите кубы</span>
+                    <div class="cubes">
+                        <input class="casino-checkbox" type="checkbox" id="cube1" name="cube1" value="1" />
+                        <label for="cube1">1</label>
+                        <input class="casino-checkbox" type="checkbox" id="cube2" name="cube2" value="2" />
+                        <label for="cube1">2</label>
+                        <input class="casino-checkbox" type="checkbox" id="cube3" name="cube3" value="3" />
+                        <label for="cube1">3</label>
+                        <input class="casino-checkbox" type="checkbox" id="cube4" name="cube4" value="4" />
+                        <label for="cube1">4</label>
+                        <input class="casino-checkbox" type="checkbox" id="cube5" name="cube5" value="5" />
+                        <label for="cube1">5</label>
+                        <input class="casino-checkbox" type="checkbox" id="cube6" name="cube6" value="6" />
+                        <label for="cube1">6</label>
+                        <span>Выигрыш:</span> <span class="casino-win"></span>
+                    </div>
+                    <button class="casino-yes"> Поставить 1000 </button>
+                    <button class="casino-no">Отказаться </button>
+                </div>
+            </div>
+            
+             <div class="menu">
+                 <button class="modal-btn" id="rollButton">Roll the Dice </button>
+                <div class="buttons">
+                 <button class="deal prison-buy">Выкуп</button>
+                <button  onclick="openModalDeal()" class="deal Deal">Сделка</button>
+                <button  onclick="openModalBuild()" class="deal build">Строить</button>
+                <button  onclick="openModalSell()" class="deal sell">Продать</button>
+                <button  onclick="openModal()" class="deal pawn">Заложить</button>
+                <button  onclick="openModalUnPawn()" class="deal unpawn">Выкупить</button>
+                <button  onclick="openModalBankrupt()" class="">Банкрот</button>
+            </div>
+            </div>
+            
+{#            <button id="build" style="display:none;">build</button>#}
+            <div class="dices-wrapper">
+                <div id="dice" data-side="1">
+		<div class="sides side-1">
+				<span class="dot dot-1"></span>
+		</div>
+		<div class="sides side-2">
+				<span class="dot dot-1"></span>
+				<span class="dot dot-2"></span>
+		</div>
+		<div class="sides side-3">
+				<span class="dot dot-1"></span>
+				<span class="dot dot-2"></span>  
+				<span class="dot dot-3"></span>
+		</div>
+		<div class="sides side-4">
+				<span class="dot dot-1"></span>
+				<span class="dot dot-2"></span>  
+				<span class="dot dot-3"></span>
+				<span class="dot dot-4"></span>
+		</div>
+		<div class="sides side-5">
+				<span class="dot dot-1"></span>
+				<span class="dot dot-2"></span>  
+				<span class="dot dot-3"></span>
+				<span class="dot dot-4"></span>
+				<span class="dot dot-5"></span>
+		</div>
+		<div class="sides side-6">
+				<span class="dot dot-1"></span>
+				<span class="dot dot-2"></span>  
+				<span class="dot dot-3"></span>
+				<span class="dot dot-4"></span>
+				<span class="dot dot-5"></span>
+				<span class="dot dot-6"></span>
+		</div>
+</div>
+            <div id="dice" data-side="1">
+		<div class="sides side-1">
+				<span class="dot dot-1"></span>
+		</div>
+		<div class="sides side-2">
+				<span class="dot dot-1"></span>
+				<span class="dot dot-2"></span>
+		</div>
+		<div class="sides side-3">
+				<span class="dot dot-1"></span>
+				<span class="dot dot-2"></span>  
+				<span class="dot dot-3"></span>
+		</div>
+		<div class="sides side-4">
+				<span class="dot dot-1"></span>
+				<span class="dot dot-2"></span>  
+				<span class="dot dot-3"></span>
+				<span class="dot dot-4"></span>
+		</div>
+		<div class="sides side-5">
+				<span class="dot dot-1"></span>
+				<span class="dot dot-2"></span>  
+				<span class="dot dot-3"></span>
+				<span class="dot dot-4"></span>
+				<span class="dot dot-5"></span>
+		</div>
+		<div class="sides side-6">
+				<span class="dot dot-1"></span>
+				<span class="dot dot-2"></span>  
+				<span class="dot dot-3"></span>
+				<span class="dot dot-4"></span>
+				<span class="dot dot-5"></span>
+				<span class="dot dot-6"></span>
+		</div>
+</div>
+            </div>
+            
+
+            <div class="chat"> <div id="message-output"></div>
+            </div>
+             <input onkeydown="handleKeyPress(event)" class="chat-input" id="message-input" type="text"  placeholder="Type your message" >
+{#            <button id="send-button">Send</button>#}
+        </div>
+
+
+
+      </div>
+      <div id="presence"><span class="tag is-success" id="pre_cnt">0</span> users online</div>
+      <div class="column">
+            <div class="box">
+              <h1 class="title">Online Users</h1>
+            </div>
+          </div></div>
+          <script src="{% static 'front/js/code.js' %}"> </script>
+</body>
+</html>

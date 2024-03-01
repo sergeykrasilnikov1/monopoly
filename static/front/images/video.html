@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Play Video on Button Click</title>
+</head>
+<body>
+
+<video id="myVideo" width="640" height="360" controls muted>
+    <source src="/home/user/Загрузки/мем со стонами. отправь другу D (256 kbps).mp3" type="video/mp4">
+    Ваш браузер не поддерживает тег video.
+</video>
+
+<button id="playButton">Play Video</button>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        var video = document.getElementById('myVideo');
+        var playButton = document.getElementById('playButton');
+
+        // Mute the video by default
+        video.muted = true;
+
+        // Function to play the video
+        function playVideo() {
+            if (video.paused) {
+                video.muted = false; // Unmute the video
+                video.play(); // Play the video
+            }
+        }
+
+        // Event listener for button click
+        playButton.addEventListener('click', playVideo);
+    });
+</script>
+
+</body>
+</html>
