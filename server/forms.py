@@ -1,8 +1,16 @@
 from django import forms
 from django.contrib.auth.forms import UserCreationForm, UserChangeForm
-
+from .models import Room
 from django.contrib.auth import get_user_model
 User = get_user_model()
+
+
+
+class RoomCreateForm(forms.ModelForm):
+    class Meta:
+        model = Room
+        fields = ['name', 'players_count']
+
 class LoginForm(forms.Form):
     username = forms.CharField(max_length=65)
     password = forms.CharField(max_length=65, widget=forms.PasswordInput)

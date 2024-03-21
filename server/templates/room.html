@@ -6,14 +6,15 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Game Field</title>
+     
 <style>
 
-    .chip {
+.chip {
     width: 50px;
     height: 50px;
     border-radius: 50%;
     position: absolute;
-    transition: transform 0.5s ease-in-out;
+    {#transition: transform 0.5s ease-in-out;#}
 }
 
 #chip1 { background-color: red; }
@@ -571,6 +572,7 @@ input:focus {
 </style>
 </head>
 <body>
+
 {% block content %}
   <h1>Players in Room {{ room.players_count }}</h1>
  
@@ -1205,6 +1207,28 @@ input:focus {
               <h1 class="title">Online Users</h1>
             </div>
           </div></div>
+<script>
+        // Функция для установки темного экрана
+        function setDarkScreen() {
+            var darkScreen = document.createElement("div");
+            darkScreen.style.position = "fixed";
+            darkScreen.style.top = "0";
+            darkScreen.style.left = "0";
+            darkScreen.style.width = "100%";
+            darkScreen.style.height = "100%";
+            darkScreen.style.backgroundColor = "black";
+            darkScreen.style.opacity = "1";
+
+            document.body.appendChild(darkScreen);
+
+            setTimeout(function() {
+                document.body.removeChild(darkScreen);
+            }, 200);
+        }
+
+        // Вызываем функцию установки темного экрана сразу после загрузки скрипта
+        setDarkScreen();
+    </script>
           <script src="{% static 'front/js/code.js' %}"> </script>
 </body>
 </html>

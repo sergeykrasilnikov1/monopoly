@@ -3,7 +3,7 @@ from server.models import User, Room, Cell
 
 @admin.register(User)
 class UserAdmin(admin.ModelAdmin):
-    list_display = ('username',)
+    pass
 
 @admin.register(Room)
 class RoomAdmin(admin.ModelAdmin):

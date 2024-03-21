@@ -12,8 +12,9 @@ router.register(r'players', PlayerViewSet, basename='player')
 router.register(r'rooms', RoomViewSet, basename='room')
 router.register(r'cells', CellViewSet, basename='cell')
 urlpatterns = [
-    path('parse/', views.api, name='api'),
+    path('create-room/', views.create_room, name='create_room'),
     path('game/pay_rent/', views.pay_rent, name='pay_rent'),
+    path('game/end_round/', views.end_round, name='end_round'),
     path('game/deal/', views.deal, name='deal'),
     path('game/unpawn/', views.unpawn, name='unpawn'),
     path('game/pawn/', views.pawn, name='pawn'),
@@ -26,8 +27,4 @@ urlpatterns = [
     path('login/', LoginView.as_view(template_name='login.html'), name='login'),
     path('logout/', LogoutView.as_view(), name='logout'),
     path('register/', views.UserRegistrationView.as_view(), name='register'),
-    path("ws/game/", consumers.PresenceConsumer.as_asgi()),
-    path('api/cells/get_cell/<str:room_name>/<int:pos>/', views.CellViewSet.as_view({'get': 'get_cell'}), name='get_cell'),
-    path('api/players/players_on_room/<str:room>/', views.PlayerViewSet.as_view({'get': 'players_on_room'}), name='players_on_room'),
-
 ]

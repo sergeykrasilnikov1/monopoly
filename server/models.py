@@ -12,7 +12,9 @@ class Room(models.Model):
     players_count = models.PositiveSmallIntegerField(default=0)
     creation_datetime = models.DateTimeField(auto_now_add=True, null=True)
     round = models.PositiveIntegerField(default=0)
-    player_turn = models.SmallIntegerField(default=-1)
+    current_player = models.SmallIntegerField(default=0)
+    start_game = models.BooleanField(default=False)
+    count_doubles = models.PositiveSmallIntegerField(default=0)
 
     def __str__(self):
         return self.name
@@ -22,11 +24,17 @@ class User(AbstractUser):
     active = models.IntegerField(default=20000)
     passive = models.IntegerField(default=20000)
     color = models.PositiveIntegerField(default=0)
-    pos = models.PositiveIntegerField(default=0)
+    pos = models.PositiveIntegerField()
+    in_prison = models.BooleanField(default=False)
+    count_roll_in_prison = models.PositiveSmallIntegerField(default=0)
+    monopoly = models.CharField(max_length=20, default='', blank=True)
     creation_datetime = models.DateTimeField(auto_now_add=True, null=True)
-    room = models.ForeignKey(Room, on_delete=models.SET(None), null=True)
+    room = models.ForeignKey(Room, on_delete=models.SET(None), null=True, blank=True)
     image = models.ImageField(upload_to='users_images', null=True, blank=True)
     # self.cells = []
+
+    # def __str__(self):
+    #     return self.color
 
 
 class Cell(models.Model):
@@ -40,7 +48,8 @@ class Cell(models.Model):
     stars = models.PositiveIntegerField(default=0)
     buy_cost = models.PositiveIntegerField()
     pos = models.PositiveIntegerField(default=0)
-    color = models.PositiveIntegerField(default=0)
+    color = models.PositiveIntegerField(default=0, null=True)
+    pawn_rounds_remaining = models.PositiveIntegerField(default=0)
 
 
 

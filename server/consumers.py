@@ -6,6 +6,8 @@ from asgiref.sync import async_to_sync, sync_to_async
 from channels.generic.websocket import WebsocketConsumer, AsyncWebsocketConsumer
 from .models import Room, User, Cell
 from channels.db import database_sync_to_async
+from django.contrib.sessions.models import Session
+from django.contrib.sessions.backends.db import SessionStore
 
 class PresenceConsumer(WebsocketConsumer):
     connections = []
@@ -46,19 +48,18 @@ def room_get(name):
 
 class ChatConsumer(AsyncWebsocketConsumer):
     connected_clients = dict()
+    session_keys = []
 
     @database_sync_to_async
     def room_create(self, color):
         room = Room.objects.get(name=self.room_name)
-        Cell.objects.all().delete()
-        for i in range(40):
-            Cell.objects.create(name=f'cell{i}', color=i // 3, buy_cost=i * 50 + 50, current_cost=i * 50+50, pos=i, room=room)
-        self.user.pos = 1
-        self.user.room = room
-        self.user.color = 0
-        self.user.active = 10000
-        self.user.passive = 20000
-        self.user.save()
+        if not (room.start_game):
+            self.user.room = room
+            self.user.color = 0
+            self.user.pos = 1
+            self.user.active = 10000
+            self.user.passive = 20000
+            self.user.save()
         self.connected_clients.setdefault(self.room_name, []).append(self)
 
     @database_sync_to_async
@@ -72,7 +73,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
                 self.user.active = 10000
                 self.user.passive = 20000
                 self.user.save()
-                self.connected_clients.setdefault(self.room_name, []).append(self)
+        self.connected_clients.setdefault(self.room_name, []).append(self)
 
     def user_count(self):
         if self.connected_clients.get(self.room_name):
@@ -80,10 +81,14 @@ class ChatConsumer(AsyncWebsocketConsumer):
         else:
             return 0
 
+    # @database_sync_to_async
     async def connect(self):
+        # self.session_key = self.scope["session"].session_key
+
         self.user = self.scope["user"]
         self.room_name = self.scope['url_route']['kwargs']['room_name']
         self.room_group_name = f'room_{self.room_name}'
+        # await self.save_connection()
         room = await room_get(self.room_name)
 
 
@@ -114,6 +119,9 @@ class ChatConsumer(AsyncWebsocketConsumer):
 
                 })
             if self.user_count() == room.players_count:
+                room.start_game = True
+                await database_sync_to_async(room.save)()
+                # sync_to_async(room.save())
                 await self.channel_layer.group_send(self.room_group_name,
                                                     {
                                                         'type': 'start',
@@ -121,11 +129,13 @@ class ChatConsumer(AsyncWebsocketConsumer):
                                                     )
 
     async def disconnect(self, close_code):
-        self.user.room = None
-        self.user.color = 0
-        await database_sync_to_async(self.user.save)()
+        print(self.user.pos)
+        # await self.remove_connection()
+        # self.user.room = None
+        # self.user.color = 0
+        # await database_sync_to_async(self.user.save)()
         self.connected_clients[self.room_name].remove(self)
-        await self.room_update(self.user_count())
+        # await self.room_update(self.user_count())
 
         # Oтsoedinяemся oт gruppy комnatы
         await self.channel_layer.group_discard(
@@ -133,6 +143,18 @@ class ChatConsumer(AsyncWebsocketConsumer):
             self.channel_name
         )
 
+    # def get_active_connections(cls, room_group_name):
+    #     return cls.channel_layer.group_channels(room_group_name)
+    #
+    # async def save_connection(self):
+    #     # Save the connection information (e.g., session_key or user_id)
+    #     session_key = self.scope["session"].session_key
+    #     self.session_keys.append(session_key)
+    #
+    # async def remove_connection(self):
+    #     # Remove the connection information when disconnecting
+    #     session_key = self.scope["session"].session_key
+    #     self.session_keys.remove(session_key)
     async def receive(self, text_data=None, bytes_data=None):
         # Обрабатываем полученные сообщения
         text_data_json = json.loads(text_data)
@@ -188,6 +210,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
                     'type': 'display_window',
                 })
         elif (message_type == 'deal_suggest'):
+            print(self.connected_clients[self.room_name])
             target = \
             [i for i in self.connected_clients[self.room_name] if i.user.color == int(text_data_json.get('enemy'))][0]
             await self.channel_layer.send(
@@ -431,7 +454,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
             {
                 'type': 'init_data',
                 'username': self.user.username,
-                'color': self.user_count()-1,
+                'color': self.user.color,
                 "online": f"{self.user_count()}",
                 "users": [f"{user.scope['user']} {user.user.passive} {user.user.active}" for user in
                           self.connected_clients[self.room_name]],
