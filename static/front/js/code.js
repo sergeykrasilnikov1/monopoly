@@ -1,6 +1,6 @@
 
 
-
+setInterval(updateGameTime, 1000);
 let room_name = window.location.href.split('/')[4]
 let in_prison = false
 const colors = ['rgba(255, 0, 0, 0.5)', 'green', 'blue', 'blue']
@@ -15,8 +15,9 @@ let companies = []
 let pawns = []
 let auction_players
 let players = []
-let players_count=0;
+let game_start = false
 const max_players = document.querySelector('.players').children.length
+let players_count= max_players;
 let round = 0;
 let username
 const monopolies = {
@@ -176,7 +177,6 @@ function endRound() {
     });
 }
 
-setInterval(updateGameTime, 1000);
 
 function check_monopoly() {
     monopoly = []
@@ -185,6 +185,10 @@ function check_monopoly() {
             monopoly.push(i)
         }
     }
+    if (monopoly.length>0) {
+            document.querySelector('.build').style.background = 'white';
+            document.querySelector('.sell').style.background = 'white';
+        }
     return monopoly!==[]
 }
 
@@ -224,7 +228,8 @@ chatSocket.onopen = function(event) {
     .then(data => {
         for (let i in data) {
             let player = data[i]
-            in_prison = player.in_prison
+            if (!player.lose){
+                in_prison = player.in_prison
             count_roll_in_prison = player.count_roll_in_prison
             players_positions[player.color]=player.pos
             if (username===player.username) player_number = player.color
@@ -243,9 +248,18 @@ chatSocket.onopen = function(event) {
 
             let deltaX = targetCenterX - startX;
             let deltaY = targetCenterY - startY;
-
             // chip.style.transition = 'transform 2s ease-in-out;';
             chip.style.transform = `translate(${deltaX}px, ${deltaY}px)`;
+            }
+            else {
+                document.querySelector('.menu').style.display = 'none'
+                players = players.filter(element => element !== player.color)
+                players_count--
+                let chip = document.getElementById(`chip${player.color+1}`)
+                document.getElementById(`player${player.color}`).style.background = 'black';
+                chip.style.display = 'none'
+
+            }
         }
     }).catch(error => {
         console.error('Error:', error);
@@ -268,10 +282,10 @@ chatSocket.onopen = function(event) {
                 cell.style.background = colors[data_cell.color]
                 cell.title = data_cell.color !== 10 ? data_cell.color : ""
                 cell.children[1].children[1].children[0].innerText = data_cell.current_cost
-                if (data_cell.color === player_number) {
-                    companies.push(parseInt(i))
-                    document.querySelector('.pawn').style.background = 'white'
-                    if (data_cell.pawn_rounds_remaining) {
+                for (let i=0; i<data_cell.stars;i++) {
+                    cell.children[1].innerHTML += '<div class="star">&#9733;</div>';
+                }
+                 if (data_cell.pawn_rounds_remaining) {
                         cell.style.background =  'rgba(0, 0, 0, 0.75)'
                         const round_wrapper = document.createElement('div')
                          const round_number = document.createElement('span')
@@ -285,7 +299,10 @@ chatSocket.onopen = function(event) {
                          round_wrapper.appendChild(round_number)
                          cell.children[1].appendChild(round_wrapper)
 
-                    }
+                 }
+                if (data_cell.color === player_number) {
+                    companies.push(parseInt(i))
+                    document.querySelector('.pawn').style.background = 'white'
                 }
             }
 
@@ -304,11 +321,18 @@ chatSocket.onopen = function(event) {
         }})
     .then(response => response.json())
     .then(data => {
+        game_start = data.start_game
         count_doubles = data.count_doubles
         current_player = data.current_player
-        let choosen_player = document.getElementById(`player${current_player}`)
-        choosen_player.style.border = '2px solid white'
-        document.querySelector('.menu').style.display = player_number===current_player ? 'block' : 'none'
+        setTimeout(check_monopoly, 100)
+        if (game_start){
+            let choosen_player = document.getElementById(`player${current_player}`)
+            choosen_player.style.border = '2px solid white'
+            document.querySelector('.menu').style.display = player_number===current_player ? 'block' : 'none'
+        }
+        else {
+            document.querySelector('.menu').style.display =  'none'
+        }
     }).catch(error => {
         console.error('Error:', error);
     });
@@ -362,10 +386,11 @@ chatSocket.onclose = function(event) {
 
 chatSocket.onmessage = (event) => {
     // document.querySelector('.menu').style.display = player_number===current_player ? 'block' : 'none'
+
     users_update()
     let data = JSON.parse(event.data)
     presenceEl.innerHTML = data.online;
-    players_count = parseInt(data.online);
+    // players_count = parseInt(data.online);
     if (data.type==='start') start();
     else if (data.type === 'init_data') {
         username = data.username
@@ -374,6 +399,11 @@ chatSocket.onmessage = (event) => {
         observer.observe(player_money, config);
     }
     else if (data.type === 'chat_message') {
+        if (data.time) {
+            hours = data.time[0]
+            minutes = data.time[1]
+            seconds = data.time[2]
+        }
         if (data.next_player) {
             console.log('aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa', current_player)
             document.getElementById(`player${current_player}`).style.border = 'none'
@@ -393,9 +423,11 @@ chatSocket.onmessage = (event) => {
     }
 
     else if (data.type=== 'bankrupt') {
+        document.querySelector('.menu').style.display = 'none'
         document.getElementById(`player${current_player}`).style.background = 'black';
+        players = players.filter(element => element !== data.player)
+        players_count--
         companies.forEach(function (pos){
-        players_count--;
         const cell = document.getElementById(`cell${pos}`)
         cell.style.background = 'white'
         cell.title = ''
@@ -425,6 +457,10 @@ chatSocket.onmessage = (event) => {
     }
     else if (data.type==='monopoly_view') {
         view_for_monopoly(data.cells)
+    }
+    else if (data.type==='build') {
+        let cell = document.getElementById(`cell${data.cell}`)
+        cell.children[1].innerHTML += '<div class="star">&#9733;</div>';
     }
      else if (data.type==='pawn') {
          const cell = document.getElementById(data.company);
@@ -512,12 +548,17 @@ chatSocket.onmessage = (event) => {
         const enemy_cells = document.querySelectorAll('.deal-company')[3]
         const modal = document.getElementById('deal-suggest')
         modal.style.display = 'block'
-        user_cells.innerHTML = deal_data.my_companies
-        enemy_cells.innerHTML = deal_data.enemy_companies
         document.querySelectorAll('.deal-suggest-money')[0].innerText = deal_data.my_money
         document.querySelectorAll('.deal-suggest-money')[1].innerText = deal_data.enemy_money
         document.querySelectorAll('.deal-money-left')[1].innerText = deal_data.all_my_money
         document.querySelectorAll('.deal-money-right')[1].innerText = deal_data.all_enemy_money
+        deal_data.my_companies.forEach(id => {
+            add_company_to_modal_deal(id, user_cells)
+        })
+        deal_data.enemy_companies.forEach(id => {
+            add_company_to_modal_deal(id.slice(4), enemy_cells)
+        })
+
         const deal_btn = document.querySelector('.deal-accept')
         function deal_accept() {
             modal.style.display = 'none'
@@ -597,7 +638,27 @@ chatSocket.onmessage = (event) => {
     }
 
 
-
+function add_company_to_modal_deal(cell_id, block) {
+    const div = document.createElement("div")
+    const container = document.createElement("div")
+    // const name = document.createElement("div")
+    const price = document.createElement("div")
+    const container_small = document.createElement("div")
+    container_small.style.display = 'flex'
+    div.style.backgroundImage = document.getElementById(`cell${cell_id}`).children[1].style.backgroundImage.replace(' rotated', '')
+    div.style.height  ='45px'
+    div.style.width  ='200px'
+    div.style.backgroundSize = 'contain'
+    div.style.backgroundRepeat = 'no-repeat'
+    get_cell(parseInt(cell_id)).then(data=> {
+         name.innerText = data.name
+        price.innerText = data.buy_cost
+        // container.appendChild(name)
+        container.appendChild(price)
+        container_small.appendChild(div)
+        container_small.appendChild(container)
+        block.appendChild(container_small)})
+}
 
 };
 function view_for_monopoly(cells){
@@ -739,10 +800,8 @@ function openModalBuild() {
     cells = [].concat(...cells);
     cells.forEach(id => {
         let company = document.getElementById(`cell${id}`)
-        company.style.zIndex = '2';
 
          company.onclick = function () {
-             company.children[1].innerHTML += '<div class="star">&#9733;</div>';
             let data = {
                     room_name: room_name,
                     cell: id
@@ -765,6 +824,12 @@ function openModalBuild() {
                         modal.style.display = "none";
                         document.querySelector('.sell').style.background = 'white';
                         company.onclick = null
+                        chatSocket.send(JSON.stringify({
+                            'type':'build',
+                            'cell':company.id.slice(4)}));
+                        chatSocket.send(JSON.stringify({
+                            'type':'chat_message',
+                            'message':'Построил'}));
                     })
                     .catch(error => {
                         console.error('Error:', error);
@@ -777,7 +842,6 @@ function openModalBuild() {
         modal.style.display = "none";
          cells.forEach(id => {
         let company = document.getElementById(`cell${id}`)
-        company.style.zIndex = '0';
         company.onclick = NaN;
 
     })
@@ -880,9 +944,32 @@ function openModal() {
 }
 
 function openModalBankrupt() {
+    let data = {
+                    room_name: room_name,
+                     };
+                fetch('../../game/bankrupt/', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': getCookie('csrftoken')
+                    },
+                    body: JSON.stringify(data)
+                })
+                    .then(response => response.json())
+                    .then(data => {
+                        // users_update()
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                    });
      chatSocket.send(JSON.stringify({
             'type': 'bankrupt',
             'player': current_player,
+        }));
+     chatSocket.send(JSON.stringify({
+            'type': 'chat_message',
+            'message': `стал банкротом`,
+                 'next_player':true,
         }));
 }
 
@@ -993,7 +1080,7 @@ function openModalDeal() {
         if (parseInt(this.value) > player_active) {
             this.value = this.value.slice(0, -1);
         }
-        left_money.textContent = (left_sum + parseInt(this.value)) ?(left_sum + parseInt(this.value)) : left_sum ;
+        left_money.textContent = (left_sum + parseInt(this.value)) ? (left_sum + parseInt(this.value)) : left_sum;
     }
     function displayText2() {
         let player_active = parseInt(document.getElementById(`player${enemy_color}`).children[2].innerText)
@@ -1037,123 +1124,127 @@ function openModalDeal() {
 
     }
 
-    // function dealUser(){
-    //         if (!choosen_company1.includes(this)) {
-    //
-    //             const div = document.createElement("div")
-    //             const container = document.createElement("div")
-    //             const name = document.createElement("div")
-    //             const price = document.createElement("div")
-    //             const container_small = document.createElement("div")
-    //             container_small.style.display = 'flex'
-    //             div.style.backgroundImage = this.children[1].style.backgroundImage.replace(' rotated', '')
-    //             div.style.height  ='45px'
-    //             div.style.width  ='200px'
-    //             get_cell(parseInt(this.id.slice(4))).then(data=> {
-    //                  name.innerText = data.name
-    //                 price.innerText = data.buy_cost
-    //                 container.appendChild(name)
-    //                 container.appendChild(price)
-    //                 container_small.appendChild(div)
-    //                 container_small.appendChild(container)
-    //                 my_companies.appendChild(container_small)
-    //                 left_sum = parseInt(left_sum) + data.buy_cost;
-    //                 left_money.textContent = parseInt(left_money.textContent) + (parseInt(inputText1.textContent) || 0) + data.buy_cost;
-    //                 choosen_company1.push(this)
-    //             })
-    //
-    //         }
-    //         else {
-    //             get_cell(parseInt(this.id.slice(4))).then(data=> {
-    //                 my_companies.children[choosen_company1.indexOf(this)].remove()
-    //                 choosen_company1 = choosen_company1.filter(element => element !== this);
-    //                 left_sum = parseInt(left_sum) - data.buy_cost;
-    //                 left_money.textContent = parseInt(left_money.textContent)  - data.buy_cost;
-    //             })
-    //         }
-    //
-    //     }
-    //
-    // function dealEnemy(){
-    //         const div = document.createElement("div")
-    //             const container = document.createElement("div")
-    //             const name = document.createElement("div")
-    //             const price = document.createElement("div")
-    //             const container_small = document.createElement("div")
-    //             container_small.style.display = 'flex'
-    //             div.style.backgroundImage = this.children[1].style.backgroundImage.replace(' rotated', '')
-    //             div.style.height  ='45px'
-    //             div.style.width  ='200px'
-    //         get_cell(parseInt(this.id.slice(4))).then(data=> {
-    //             if (!choosen_company2.includes(this)) {
-    //                  name.innerText = data.name
-    //                 price.innerText = data.buy_cost
-    //                 container.appendChild(name)
-    //                 container.appendChild(price)
-    //                 container_small.appendChild(div)
-    //                 container_small.appendChild(container)
-    //                 no_my_companies.appendChild(container_small)
-    //                 right_sum = parseInt(right_sum) + data.buy_cost;
-    //                 // no_my_companies.appendChild(div)
-    //                 right_money.textContent = parseInt(right_money.textContent) + (parseInt(inputText2.textContent) || 0) + data.buy_cost;
-    //                 choosen_company2.push(this)
-    //             }
-    //             else {
-    //                 no_my_companies.children[choosen_company2.indexOf(this)].remove()
-    //                 choosen_company2 = choosen_company2.filter(element => element !== this);
-    //                 right_sum = parseInt(right_sum) - data.buy_cost;
-    //                 right_money.textContent = parseInt(right_money.textContent) - data.buy_cost;
-    //             }
-    //         })
-    //     }
-    function dealCompany(isUser) {
-    const div = document.createElement("div");
-    const container = document.createElement("div");
-    const name = document.createElement("div");
-    const price = document.createElement("div");
-    const container_small = document.createElement("div");
-    container_small.style.display = 'flex';
-    div.style.backgroundImage = this.children[1].style.backgroundImage.replace(' rotated', '');
-    div.style.height = '45px';
-    div.style.width = '200px';
+    function dealUser(){
+            if (!choosen_company1.includes(this)) {
 
-    get_cell(parseInt(this.id.slice(4))).then(data => {
-        name.innerText = data.name;
-        price.innerText = data.buy_cost;
-        container.appendChild(name);
-        container.appendChild(price);
-        container_small.appendChild(div);
-        container_small.appendChild(container);
+                const div = document.createElement("div")
+                const container = document.createElement("div")
+                // const name = document.createElement("div")
+                const price = document.createElement("div")
+                const container_small = document.createElement("div")
+                container_small.style.display = 'flex'
+                div.style.backgroundImage = this.children[1].style.backgroundImage.replace(' rotated', '')
+                div.style.height  ='45px'
+                div.style.width  ='200px'
+                div.style.backgroundSize = 'contain'
+                div.style.backgroundRepeat = 'no-repeat'
+                get_cell(parseInt(this.id.slice(4))).then(data=> {
+                     name.innerText = data.name
+                    price.innerText = data.buy_cost
+                    // container.appendChild(name)
+                    container.appendChild(price)
+                    container_small.appendChild(div)
+                    container_small.appendChild(container)
+                    my_companies.appendChild(container_small)
+                    left_sum = parseInt(left_sum) + data.buy_cost;
+                    left_money.textContent = parseInt(left_money.textContent) + (parseInt(inputText1.textContent) || 0) + data.buy_cost;
+                    choosen_company1.push(this)
+                })
 
-        const companyList = isUser ? my_companies : no_my_companies;
-        let chosenCompanies = isUser ? choosen_company1 : choosen_company2;
-        const moneyElement = isUser ? left_money : right_money;
-        const inputTextElement = isUser ? inputText1 : inputText2;
-        let sumElement = isUser ? left_sum : right_sum;
+            }
+            else {
+                get_cell(parseInt(this.id.slice(4))).then(data=> {
+                    my_companies.children[choosen_company1.indexOf(this)].remove()
+                    choosen_company1 = choosen_company1.filter(element => element !== this);
+                    left_sum = parseInt(left_sum) - data.buy_cost;
+                    left_money.textContent = parseInt(left_money.textContent)  - data.buy_cost;
+                })
+            }
 
-        if (!chosenCompanies.includes(this)) {
-            companyList.appendChild(container_small);
-            sumElement += data.buy_cost;
-            moneyElement.textContent = parseInt(moneyElement.textContent) + (parseInt(inputTextElement.textContent) || 0) + data.buy_cost;
-            chosenCompanies.push(this);
-        } else {
-            companyList.children[chosenCompanies.indexOf(this)].remove();
-            chosenCompanies = chosenCompanies.filter(element => element !== this);
-            sumElement -= data.buy_cost;
-            moneyElement.textContent = parseInt(moneyElement.textContent) - data.buy_cost;
         }
-    });
-}
 
-// Использование функции для пользователя
-function dealUser() {
-    dealCompany.call(this, true);
-}
-
-// Использование функции для врага
-function dealEnemy() {
-    dealCompany.call(this, false);
-}
+    function dealEnemy(){
+            const div = document.createElement("div")
+                const container = document.createElement("div")
+                // const name = document.createElement("div")
+                const price = document.createElement("div")
+                const container_small = document.createElement("div")
+                container_small.style.display = 'flex'
+                div.style.backgroundImage = this.children[1].style.backgroundImage.replace(' rotated', '')
+                div.style.height  ='45px'
+                div.style.width  ='200px'
+                div.style.backgroundSize = 'contain'
+                div.style.backgroundRepeat = 'no-repeat'
+            get_cell(parseInt(this.id.slice(4))).then(data=> {
+                if (!choosen_company2.includes(this)) {
+                     name.innerText = data.name
+                    price.innerText = data.buy_cost
+                    // container.appendChild(name)
+                    container.appendChild(price)
+                    container_small.appendChild(div)
+                    container_small.appendChild(container)
+                    no_my_companies.appendChild(container_small)
+                    right_sum = parseInt(right_sum) + data.buy_cost;
+                    // no_my_companies.appendChild(div)
+                    right_money.textContent = parseInt(right_money.textContent) + (parseInt(inputText2.textContent) || 0) + data.buy_cost;
+                    choosen_company2.push(this)
+                }
+                else {
+                    no_my_companies.children[choosen_company2.indexOf(this)].remove()
+                    choosen_company2 = choosen_company2.filter(element => element !== this);
+                    right_sum = parseInt(right_sum) - data.buy_cost;
+                    right_money.textContent = parseInt(right_money.textContent) - data.buy_cost;
+                }
+            })
+        }
+//     function dealCompany(isUser) {
+//     const div = document.createElement("div");
+//     const container = document.createElement("div");
+//     const name = document.createElement("div");
+//     const price = document.createElement("div");
+//     const container_small = document.createElement("div");
+//     container_small.style.display = 'flex';
+//     div.style.backgroundImage = this.children[1].style.backgroundImage.replace(' rotated', '');
+//     div.style.height = '45px';
+//     div.style.width = '200px';
+//
+//     get_cell(parseInt(this.id.slice(4))).then(data => {
+//         name.innerText = data.name;
+//         price.innerText = data.buy_cost;
+//         container.appendChild(name);
+//         container.appendChild(price);
+//         container_small.appendChild(div);
+//         container_small.appendChild(container);
+//
+//         const companyList = isUser ? my_companies : no_my_companies;
+//         let chosenCompanies = isUser ? choosen_company1 : choosen_company2;
+//         const moneyElement = isUser ? left_money : right_money;
+//         const inputTextElement = isUser ? inputText1 : inputText2;
+//         let sumElement = isUser ? left_sum : right_sum;
+//
+//         if (!chosenCompanies.includes(this)) {
+//             companyList.appendChild(container_small);
+//             sumElement += data.buy_cost;
+//             moneyElement.textContent = parseInt(moneyElement.textContent) + (parseInt(inputTextElement.textContent) || 0) + data.buy_cost;
+//             chosenCompanies.push(this);
+//         } else {
+//             companyList.children[chosenCompanies.indexOf(this)].remove();
+//             chosenCompanies = chosenCompanies.filter(element => element !== this);
+//             sumElement -= data.buy_cost;
+//             moneyElement.textContent = parseInt(moneyElement.textContent) - data.buy_cost;
+//         }
+//     });
+// }
+//
+// // Использование функции для пользователя
+// function dealUser() {
+//     dealCompany.call(this, true);
+// }
+//
+// // Использование функции для врага
+// function dealEnemy() {
+//     dealCompany.call(this, false);
+// }
 
                 function event () {
             companies.forEach(id => {
@@ -1289,19 +1380,6 @@ function getRandomInt(min, max) {
   return Math.floor(Math.random() * (max - min + 1)) + min;
 }
 
-
-// function dice_animation(number1, number2) {
-//     const dice1 = document.getElementById('dice1');
-//     const dice2 = document.getElementById('dice2');
-//     dice1.textContent = number1
-//     dice2.textContent = number2
-//     dice1.classList.add('roll-animation');
-//     dice2.classList.add('roll-animation');
-//     setTimeout(() => {
-//     dice1.classList.remove('roll-animation');
-//     dice2.classList.remove('roll-animation');
-// }, 1000);
-// }
 
 
 
@@ -1781,32 +1859,33 @@ function dice_animation(number1,number2) {
 }
 
 function start() {
+    game_start = true
     document.querySelector('.menu').style.display = player_number===current_player ? 'block' : 'none'
     document.getElementById(`player${0}`).style.border = 'none'
     // document.getElementById(`player${0}`).style.backgroundColor = colors[0]
-     fetch(`../../api/cells/?room__name=${room_name}`,{
-        method: 'GET',
-        headers: {
-            'Content-Type': 'application/json',
-            'X-CSRFToken': getCookie('csrftoken')
-        }})
-    .then(response => response.json())
-    .then(data => {
-        // for (let i=0;i<players_count;i++) {
-        //     players.push(i)
-        // }
-        for (let i=0;i<40;i++){
-            let cell = document.getElementById(`cell${i}`)
-            if (!cell.classList.contains("special-cell")) {
-                cell.children[0].innerText = data[i].name
-                // cell.children[1].innerText = data[i].buy_cost
-                cell.children[1].children[1].children[0].innerText = data[i].current_cost
-                // cell.children[1].children[0].children[0].innerText = data[i].buy_cost / 2 + '$'
-            }
-        }
-    }).catch(error => {
-        console.error('Error:', error);
-    });
+    //  fetch(`../../api/cells/?room__name=${room_name}`,{
+    //     method: 'GET',
+    //     headers: {
+    //         'Content-Type': 'application/json',
+    //         'X-CSRFToken': getCookie('csrftoken')
+    //     }})
+    // .then(response => response.json())
+    // .then(data => {
+    //     // for (let i=0;i<players_count;i++) {
+    //     //     players.push(i)
+    //     // }
+    //     for (let i=0;i<40;i++){
+    //         let cell = document.getElementById(`cell${i}`)
+    //         if (!cell.classList.contains("special-cell")) {
+    //             cell.children[0].innerText = data[i].name
+    //             // cell.children[1].innerText = data[i].buy_cost
+    //             cell.children[1].children[1].children[0].innerText = data[i].current_cost
+    //             // cell.children[1].children[0].children[0].innerText = data[i].buy_cost / 2 + '$'
+    //         }
+    //     }
+    // }).catch(error => {
+    //     console.error('Error:', error);
+    // });
 }
 
 // document.addEventListener("DOMContentLoaded", function() {

@@ -56,6 +56,9 @@ def room(request, room_name):
     return render(request, 'room.html', {
         'room_name': room_name})
 
+def test(request):
+    return render(request, 'test.html')
+
 class PlayerViewSet(viewsets.ModelViewSet):
     queryset = User.objects.all()
     serializer_class = PlayerSerializer
@@ -123,6 +126,35 @@ class UserRegistrationView(CreateView):
     success_url = reverse_lazy('login')
 
 
+
+def bankrupt(request):
+
+    if request.method == 'POST':
+        try:
+            data = json.loads(request.body)
+            room = Room.objects.filter(name=data.get('room_name'))[0]
+            player = request.user
+            cells = Cell.objects.filter(owner=player, room=room)
+            for cell in cells:
+                cell.owner = None
+                cell.current_cost = cell.buy_cost
+                cell.stars = 0
+                cell.monopoly = False
+                cell.color = None
+                cell.pawn_rounds_remaining = 0
+                cell.save()
+            player.lose = True
+            player.save()
+            response_data = {'message': ' '.join('OK'),
+                             }
+            return JsonResponse(response_data)
+        except json.JSONDecodeError as e:
+            response_data = {'message': 'Неверный формат JSON.', 'error': str(e)}
+            return JsonResponse(response_data, status=400)
+    else:
+        response_data = {'message': 'Метод не разрешен.'}
+        return JsonResponse(response_data, status=405)
+
 def buy_company(request):
 
     if request.method == 'POST':
@@ -169,10 +201,9 @@ def build(request):
     if request.method == 'POST':
         try:
             data = json.loads(request.body)
-            # a = data.get('cell')
-            # room_name = 'room_' + data.get('room_name')
+            # room_name = 'room_' +
             print(data.get('cell'))
-            cell = Cell.objects.get(name=f"cell{data.get('cell')}")
+            cell = Cell.objects.get(name=f"cell{data.get('cell')}", room__name=data.get('room_name'))
             player = request.user
             cell.current_cost = cell.current_cost * 2
             player.active -= cell.current_cost
@@ -195,7 +226,7 @@ def sell(request):
             data = json.loads(request.body)
             # a = data.get('cell')
             # room_name = 'room_' + data.get('room_name')
-            cell = Cell.objects.get(name=f"cell{data.get('cell')}")
+            cell = Cell.objects.get(name=f"cell{data.get('cell')}",  room__name=data.get('room_name'))
             player = request.user
             cell.current_cost = cell.current_cost // 2
             player.active += cell.current_cost
@@ -310,12 +341,12 @@ def deal(request):
             player_cells = data.get('player_cells')
             enemy_cells = data.get('enemy_cells')
             for id in player_cells:
-                cell = Cell.objects.get(name='cell' + str(id))
+                cell = Cell.objects.get(name='cell' + str(id), room=room)
                 cell.owner = enemy
                 cell.color = enemy.color
                 cell.save()
             for id in enemy_cells:
-                cell = Cell.objects.get(name=id)
+                cell = Cell.objects.get(name=id, room=room)
                 cell.owner = player
                 cell.color = player.color
                 cell.save()
@@ -327,7 +358,7 @@ def deal(request):
             monopoly_count = [str(i) for i, j in monopoly.items() if all(item in player_cells for item in j)]
             for i in monopoly_count:
                 for j in monopoly[int(i)]:
-                    cell = Cell.objects.get(name=f"cell{j}")
+                    cell = Cell.objects.get(name=f"cell{j}", room=room)
                     if not cell.monopoly:
                         cell.monopoly = True
                         cell.current_cost = cell.buy_cost

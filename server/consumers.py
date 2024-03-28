@@ -1,7 +1,7 @@
 import json
 import asyncio
 import random
-
+import time
 from asgiref.sync import async_to_sync, sync_to_async
 from channels.generic.websocket import WebsocketConsumer, AsyncWebsocketConsumer
 from .models import Room, User, Cell
@@ -48,6 +48,7 @@ def room_get(name):
 
 class ChatConsumer(AsyncWebsocketConsumer):
     connected_clients = dict()
+    rooms_times = dict()
     session_keys = []
 
     @database_sync_to_async
@@ -58,6 +59,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
             self.user.color = 0
             self.user.pos = 1
             self.user.active = 10000
+            self.user.lose = False
             self.user.passive = 20000
             self.user.save()
         self.connected_clients.setdefault(self.room_name, []).append(self)
@@ -69,6 +71,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
             if self.user.room != room:
                 self.user.color = players_count
                 self.user.pos = 1
+                self.user.lose = False
                 self.user.room = room
                 self.user.active = 10000
                 self.user.passive = 20000
@@ -119,14 +122,15 @@ class ChatConsumer(AsyncWebsocketConsumer):
 
                 })
             if self.user_count() == room.players_count:
-                room.start_game = True
-                await database_sync_to_async(room.save)()
-                # sync_to_async(room.save())
-                await self.channel_layer.group_send(self.room_group_name,
-                                                    {
-                                                        'type': 'start',
-                                                    }
-                                                    )
+                if not room.start_game:
+                    self.rooms_times[self.room_name] = time.time()
+                    room.start_game = True
+                    await database_sync_to_async(room.save)()
+                    await self.channel_layer.group_send(self.room_group_name,
+                                                        {
+                                                            'type': 'start',
+                                                        }
+                                                        )
 
     async def disconnect(self, close_code):
         print(self.user.pos)
@@ -280,6 +284,15 @@ class ChatConsumer(AsyncWebsocketConsumer):
                 }
             )
 
+        elif (message_type == 'build'):
+            await self.channel_layer.group_send(
+                self.room_group_name,
+                {
+                    'type': 'build',
+                    'cell': text_data_json.get('cell'),
+                }
+            )
+
 
     async def start(self, event):
         # Отправляем сообщение обратно через WebSocket
@@ -296,6 +309,12 @@ class ChatConsumer(AsyncWebsocketConsumer):
     async def chat_message(self, event):
         # Отправляем сообщение обратно через WebSocket
         print(self.connected_clients)
+        print(self.rooms_times)
+        time_struct = time.gmtime(time.time() - self.rooms_times.get(self.room_name, time.time()))
+        hours = time_struct.tm_hour
+        minutes = time_struct.tm_min
+        seconds = time_struct.tm_sec
+        print(seconds, time.gmtime(time.time() - self.rooms_times.get(self.room_name, time.time())), time.time())
         await self.send(text_data=json.dumps(
             {
                 'type': 'chat_message',
@@ -306,6 +325,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
                 "online": f"{self.user_count()}",
                 "users": [f"{user.scope['user']} {user.user.passive} {user.user.active}" for user in
                           self.connected_clients[self.room_name]],
+                'time': [hours, minutes, seconds]
             }
         ))
 
@@ -443,6 +463,18 @@ class ChatConsumer(AsyncWebsocketConsumer):
             {
                 'type': 'bankrupt',
                 'player': event['player'],
+                "online": f"{self.user_count()}",
+                "users": [f"{user.scope['user']} {user.user.passive} {user.user.active}" for user in
+                          self.connected_clients[self.room_name]],
+            }
+        ))
+
+    async def build(self, event):
+        # Отправляем сообщение обратно через WebSocket
+        await self.send(text_data=json.dumps(
+            {
+                'type': 'build',
+                'cell': event['cell'],
                 "online": f"{self.user_count()}",
                 "users": [f"{user.scope['user']} {user.user.passive} {user.user.active}" for user in
                           self.connected_clients[self.room_name]],

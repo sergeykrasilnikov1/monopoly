@@ -24,13 +24,14 @@ class User(AbstractUser):
     active = models.IntegerField(default=20000)
     passive = models.IntegerField(default=20000)
     color = models.PositiveIntegerField(default=0)
-    pos = models.PositiveIntegerField()
+    pos = models.PositiveIntegerField(default=0)
     in_prison = models.BooleanField(default=False)
     count_roll_in_prison = models.PositiveSmallIntegerField(default=0)
     monopoly = models.CharField(max_length=20, default='', blank=True)
     creation_datetime = models.DateTimeField(auto_now_add=True, null=True)
     room = models.ForeignKey(Room, on_delete=models.SET(None), null=True, blank=True)
     image = models.ImageField(upload_to='users_images', null=True, blank=True)
+    lose = models.BooleanField(default=False)
     # self.cells = []
 
     # def __str__(self):
