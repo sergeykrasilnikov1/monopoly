@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Contact Form</title>
+    <!-- Add jQuery library -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+</head>
+<body>
+    <h2>Contact Us</h2>
+    <form id="emailForm"  method="POST">
+        <label for="name">Name:</label><br>
+        <input type="text" id="name" name="name" required><br><br>
+        
+        <label for="email">Email:</label><br>
+        <input type="email" id="email" name="email" required><br><br>
+        
+        <label for="taskInfo">Task Information:</label><br>
+        <textarea id="taskInfo" name="taskInfo" rows="4" required></textarea><br><br>
+        
+        <button class="t-submit" type="submit">Submit</button>
+    </form>
+    <script>
+        setTimeout(function() {
+            document.querySelector('.t-submit').addEventListener('click', function(event) {
+                event.preventDefault(); // Prevent the default form submission
+                sendEmail();
+            });
+
+            function sendEmail() {
+                var formData = new FormData(document.getElementById('emailForm'));
+
+                fetch('/send_email.php', {
+                    method: 'POST',
+                    body: formData
+                })
+                .then(response => {
+                    if (response.ok) {
+                        console.log(response);
+                        alert('Email sent successfully!');
+                    } else {
+                        console.error(response);
+                        alert('Error sending email.');
+                    }
+                })
+                .catch(error => {
+                    console.error(error);
+                    alert('Error sending email.');
+                });
+            }
+        }, 3000);
+    </script>
+    <script>
+        $(document).ready(function() {
+            $('.t-submit').on('click', function(event) {
+                event.preventDefault(); // Prevent the default form submission
+                sendEmail();
+            });
+
+            function sendEmail() {
+                var formData = $('#emailForm').serialize();
+
+                $.ajax({
+                    type: 'POST',
+                    url: '/send_email.php', // Change this to your server-side script URL
+                    data: formData,
+                    success: function(response) {
+                        console.log(response);
+                        alert('Email sent successfully!');
+                    },
+                    error: function(error) {
+                        console.error(error);
+                        alert('Error sending email.');
+                    }
+                });
+            }
+        });
+    </script>
+</body>
+</html>
