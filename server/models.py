@@ -3,10 +3,6 @@ from django.contrib.auth.models import AbstractUser
 from django.db import models
 
 
-
-
-
-
 class Room(models.Model):
     name = models.CharField(max_length=100)
     players_count = models.PositiveSmallIntegerField(default=0)
@@ -51,6 +47,4 @@ class Cell(models.Model):
     pos = models.PositiveIntegerField(default=0)
     color = models.PositiveIntegerField(default=0, null=True)
     pawn_rounds_remaining = models.PositiveIntegerField(default=0)
-
-
 
