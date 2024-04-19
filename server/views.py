@@ -175,7 +175,7 @@ def buy_company(request):
             cell.color = player.color
             cell.current_cost = cell.buy_cost//10
             cell.save()
-            player_cells = [cell.pos for cell in Cell.objects.filter(owner=player) if cell.owner == player]
+            player_cells = [cell.pos for cell in Cell.objects.filter(owner=player, room=room) if cell.owner == player]
             monopoly_count = [str(i) for i, j in monopoly.items() if all(item in player_cells for item in j)]
             cells = []
             for i in monopoly_count:
@@ -183,7 +183,7 @@ def buy_company(request):
                     cell = Cell.objects.get(name=f"cell{j}", room=room)
                     if not cell.monopoly:
                         cell.monopoly = True
-                        cell.current_cost = cell.buy_cost
+                        cell.current_cost *= 2
                         cell.save()
                         cells.append(str(cell.pos))
             response_data = {'message': ' '.join(monopoly_count),
@@ -206,12 +206,13 @@ def build(request):
             cell = Cell.objects.get(name=f"cell{data.get('cell')}", room__name=data.get('room_name'))
             player = request.user
             cell.current_cost = cell.current_cost * 2
-            player.active -= cell.current_cost
+            player.active -= round(250 * cell.pos/3 / 100) * 100
+            player.build_allowed = False
             player.save()
             cell.stars += 1
             cell.save()
             response_data = {'message': f'{cell.id}',
-                             'stars': f'{cell.stars}'}
+                             'stars': cell.stars}
             return JsonResponse(response_data)
         except json.JSONDecodeError as e:
             response_data = {'message': 'Неверный формат JSON.', 'error': str(e)}
@@ -271,7 +272,7 @@ def pawn(request):
             # room_name = 'room_' + data.get('room_name')
             cell = Cell.objects.get(name=f"cell{data.get('cell')}", room__name=data.get('room_name'))
             player = request.user
-            player.active += int(cell.buy_cost * 0.75)
+            player.active += int(cell.buy_cost//2)
             player.save()
             cell.current_cost = 0
             response_data = {'message': f'{cell.id}'}
@@ -292,9 +293,10 @@ def unpawn(request):
             # room_name = 'room_' + data.get('room_name')
             cell = Cell.objects.get(name=f"cell{data.get('cell')}", room__name=data.get('room_name'))
             player = request.user
-            player.active -= cell.buy_cost
+            player.active -= cell.buy_cost//5*3
             player.save()
-            cell.current_cost = cell.buy_cost//10
+            cell.current_cost = cell.buy_cost
+            cell.pawn_rounds_remaining = 0
             cell.save()
             response_data = {'message': f'{cell.id}'}
             return JsonResponse(response_data)
@@ -308,8 +310,12 @@ def unpawn(request):
 def end_round(request):
     if request.method == 'POST':
         try:
+            request.user.build_allowed = True
+            request.user.save()
             data = json.loads(request.body)
             room = Room.objects.filter(name=data.get('room_name'))[0]
+            room.count_deals = 0
+            room.save()
             cells = Cell.objects.filter(room=room)
             for cell in cells:
                 if cell.pawn_rounds_remaining:
@@ -354,23 +360,23 @@ def deal(request):
             enemy.active = enemy.active - int(data.get('enemy_money') or 0) + int(data.get('player_money') or 0)
             player.save()
             enemy.save()
-            player_cells = [cell.pos for cell in Cell.objects.filter(owner=player) if cell.owner == player]
+            player_cells = [cell.pos for cell in Cell.objects.filter(owner=player, room=room) if cell.owner == player]
             monopoly_count = [str(i) for i, j in monopoly.items() if all(item in player_cells for item in j)]
             for i in monopoly_count:
                 for j in monopoly[int(i)]:
                     cell = Cell.objects.get(name=f"cell{j}", room=room)
                     if not cell.monopoly:
                         cell.monopoly = True
-                        cell.current_cost = cell.buy_cost
+                        cell.current_cost *= 2
                         cell.save()
-            player_cells = [cell.pos for cell in Cell.objects.filter(owner=enemy) if cell.owner == enemy]
+            player_cells = [cell.pos for cell in Cell.objects.filter(owner=enemy, room=room) if cell.owner == enemy]
             monopoly_count = [str(i) for i, j in monopoly.items() if all(item in player_cells for item in j)]
             for i in monopoly_count:
                 for j in monopoly[int(i)]:
-                    cell = Cell.objects.get(name=f"cell{j}")
+                    cell = Cell.objects.get(name=f"cell{j}", room=room)
                     if not cell.monopoly:
                         cell.monopoly = True
-                        cell.current_cost = cell.buy_cost
+                        cell.current_cost *= 2
                         cell.save()
             response_data = {'message': 'Ok'}
             return JsonResponse(response_data)
@@ -393,9 +399,11 @@ def create_room(request):
             form.save()
             room_name = form.cleaned_data['name']
             room = Room.objects.get(name=room_name)
-            for i in range(40):
-                Cell.objects.create(name=f'cell{i}', color=10, buy_cost=i * 50 + 50, current_cost=i * 50 + 50,
-                                    pos=i, room=room)
+            with open("data_cells.json", 'r') as file:
+                data = json.load(file)
+                for i in data:
+                    Cell.objects.create(name=f'cell{i["position"]}', color=10, buy_cost=i.get("cost", 0), current_cost=i.get("cost", 0),
+                                    pos=i["position"], room=room, title=i["title"], category=i["category"])
             return redirect('../')
     else:
         form = RoomCreateForm()

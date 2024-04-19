@@ -20,6 +20,8 @@ const max_players = document.querySelector('.players').children.length
 let players_count= max_players;
 let round = 0;
 let username
+let count_deals = 0
+let build_allow = true
 const monopolies = {
     0: [1,3],
     1: [4,12,28],
@@ -32,6 +34,8 @@ const monopolies = {
     8: [31,32,34],
     9: [37,39],
 }
+
+const cell_names = []
 
 
 
@@ -129,7 +133,231 @@ function updateGameTime() {
     document.getElementById('gameTime').innerHTML = formatTime(hours) + ':' + formatTime(minutes) + ':' + formatTime(seconds);
 }
 
+document.querySelectorAll('.player').forEach(function(element) {
+    element.addEventListener('click', function() {
+        element.children[4].style.display = 'block';
+         if (element.children[4].children[0].style.display==='block' || parseInt(element.id.slice(6))===player_number || player_number!==current_player || count_deals===3){
+             element.children[4].children[0].style.display='none'
+         }
+        else{
+            element.children[4].children[0].style.display = 'block';
+            element.children[4].children[0].addEventListener('click', openModalDeal)
+         }
+        if (element.children[4].children[1].style.display==='none' && parseInt(element.id.slice(6))===player_number && player_number===current_player) {
+            element.children[4].children[1].style.display='block'
+            element.children[4].children[1].addEventListener('click', openModalBankrupt)
+        }
+        else {
+            element.children[4].children[1].style.display='none'
+        }
+    })
+})
+document.querySelectorAll('.element').forEach(function(element) {
+    const id  = parseInt(element.parentElement.id.slice(4))
+    element.addEventListener('click', function() {
+        if (element.children[0].style.display==='block' || document.getElementById('deal').style.display==='block')
+             element.children[0].style.display = 'none';
+
+        else {
+           element.children[0].style.display = 'block';
+           if (current_player===player_number && parseInt(element.parentElement.title) === player_number) {
+              const stars = parseInt(element.children[2].getAttribute("data-stars"));
+           const pawn = parseInt(element.getAttribute("data-pawn"));
+           let pawn_allow = true;
+           if (stars!==5) {
+               for (let i of monopoly) {
+                   for (let cell of monopolies[i]) {
+                       if (parseInt(document.getElementById(`cell${cell}`).children[1].children[2].getAttribute('data-stars'))) {
+                           pawn_allow = false;
+                       }
+                   }
+               if (monopolies[i].includes(id) && build_allow && parseInt(player_money.innerText)>= Math.round(250 * id/3 / 100) * 100){
+
+                   function build_click(){
+                        element.children[2].setAttribute("data-stars", `${stars+1}` )
+                        build_allow = false
+                       let data = {
+                        room_name: room_name,
+                        cell: id
+                        };
+                fetch('../../game/build/', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': getCookie('csrftoken')
+                    },
+                    body: JSON.stringify(data)
+                })
+                    .then(response => response.json())
+                    .then(data => {
+                        console.log(data);
+                        chatSocket.send(JSON.stringify({
+                            'type':'build',
+                            'cell':id,
+                            'stars': data.stars}));
+                        chatSocket.send(JSON.stringify({
+                            'type':'chat_message',
+                            'message':`Построил филиал компании ${cell_names[id]}`}));
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                    });
+                    this.removeEventListener('click', build_click)
+                   }
+
+                   const build_btn = element.children[0].children[1].children[0]
+                   build_btn.style.display = 'block';
+                   build_btn.addEventListener('click', build_click)
+               }
+               else {
+                   element.children[0].children[1].children[0].style.display = 'none';
+               }
+
+            }
+           }
+            else {
+                element.children[0].children[1].children[0].style.display = 'none';
+           }
+           if (stars===0 && !pawn && pawn_allow) {
+               function pawn_click() {
+                   element.setAttribute("data-pawn", `1` )
+                       let data = {
+                             room_name: room_name,
+                             cell: id
+                        };
+                 chatSocket.send(JSON.stringify({
+                    'type':'pawn',
+                    'company':id}));
+                chatSocket.send(JSON.stringify({
+                    'type':'chat_message',
+                    'message':`заложил компанию ${cell_names[id]}`}));
+                 fetch('../../game/pawn/', {
+                     method: 'POST',
+                     headers: {
+                         'Content-Type': 'application/json',
+                         'X-CSRFToken': getCookie('csrftoken')
+                     },
+                     body: JSON.stringify(data)
+                 })
+                     .then(response => response.json())
+                     .then(data => {
+                         console.log(data);
+                     })
+                     .catch(error => {
+                         console.error('Error:', error);
+                     });
+                 this.removeEventListener('click', pawn_click)
+               }
+                const pawn_btn = element.children[0].children[1].children[2]
+                   pawn_btn.style.display = 'block';
+                   pawn_btn.addEventListener('click', pawn_click)
+           }
+           else {
+               element.children[0].children[1].children[2].style.display = 'none';
+           }
+           if (stars) {
+               function sell_click() {
+                   element.children[2].setAttribute("data-stars", `${stars-1}` )
+                    let data = {
+                        room_name: room_name,
+                        cell: id
+                        };
+                fetch('../../game/sell/', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': getCookie('csrftoken')
+                    },
+                    body: JSON.stringify(data)
+                })
+                    .then(response => response.json())
+                    .then(data => {
+                        // users_update()
+                        console.log(data);
+                        chatSocket.send(JSON.stringify({
+                            'type':'sell',
+                            'cell':id,
+                            'stars': data.stars}));
+                        chatSocket.send(JSON.stringify({
+                            'type':'chat_message',
+                            'message':`Продаёт филиал компании ${cell_names[id]}`}));
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                    });
+                this.removeEventListener('click', sell_click)
+               }
+               const sell_btn = element.children[0].children[1].children[1]
+                   sell_btn.style.display = 'block';
+                   sell_btn.addEventListener('click', sell_click)
+           }
+           else {
+               element.children[0].children[1].children[1].style.display = 'none';
+           }
+           if (pawn) {
+               function unpawn_click() {
+                   element.setAttribute("data-pawn", `0` )
+                       let data = {
+                        room_name: room_name,
+                        cell: id
+                     };
+                fetch('../../game/unpawn/', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': getCookie('csrftoken')
+                    },
+                    body: JSON.stringify(data)
+                })
+                    .then(response => response.json())
+                    .then(data => {
+                       chatSocket.send(JSON.stringify({
+                    'type':'unpawn',
+                    'cell':id}));
+                        chatSocket.send(JSON.stringify({
+                    'type':'chat_message',
+                    'message':`Выкупил компанию ${cell_names[id]}`}));
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                    });
+                    this.removeEventListener('click', unpawn_click)
+               }
+                const pawn_btn = element.children[0].children[1].children[3]
+                   pawn_btn.style.display = 'block';
+                   pawn_btn.addEventListener('click', unpawn_click)
+           }
+           else {
+               element.children[0].children[1].children[3].style.display = 'none';
+           }
+           }
+           else {
+               element.children[0].children[1].children[0].style.display = 'none';
+               element.children[0].children[1].children[1].style.display = 'none';
+               element.children[0].children[1].children[2].style.display = 'none';
+                element.children[0].children[1].children[3].style.display = 'none';
+
+           }
+
+        }
+    });})
+document.addEventListener('click', function(event) {
+  const isClickInsidePopup = event.target.classList.contains('element');
+  const isClickInsideElement = event.target.classList.contains('popup');
+  if (!isClickInsidePopup && !isClickInsideElement) {
+    document.querySelectorAll('.popup').forEach(function (el){
+        el.style.display = 'none';
+    })
+  }
+  if (!event.target.classList.contains('player')) {
+      document.querySelectorAll('.player-popup').forEach(function (el){
+        el.style.display = 'none';
+    })
+  }
+});
 function endRound() {
+    count_deals = 0;
+    build_allow = true;
     let Data = {
                 room_name: room_name,
                 };
@@ -185,10 +413,6 @@ function check_monopoly() {
             monopoly.push(i)
         }
     }
-    if (monopoly.length>0) {
-            document.querySelector('.build').style.background = 'white';
-            document.querySelector('.sell').style.background = 'white';
-        }
     return monopoly!==[]
 }
 
@@ -215,7 +439,7 @@ document.querySelector('.chat').scrollTop = document.querySelector('.chat').scro
 
 chatSocket.onopen = function(event) {
     // setDarkScreen();
-    for (let i=0;i<max_players;i++) players.push(i)
+
 
 
     fetch(`../../api/players/?ordering=color&room__name=${room_name}`,{
@@ -230,26 +454,29 @@ chatSocket.onopen = function(event) {
             let player = data[i]
             if (!player.lose){
                 in_prison = player.in_prison
-            count_roll_in_prison = player.count_roll_in_prison
-            players_positions[player.color]=player.pos
-            if (username===player.username) player_number = player.color
-            let chip = document.getElementById(`chip${player.color+1}`)
-            let elementToMoveRect = chip.getBoundingClientRect();
-            const computedStyles = window.getComputedStyle(chip);
-            const transformValue = computedStyles.getPropertyValue('transform');
-            const matrix = new DOMMatrix(transformValue);
-            const translateX = matrix.m41;
-            const translateY = matrix.m42;
-            let startX = elementToMoveRect.left -translateX + (elementToMoveRect.width / 2);
-            let startY =elementToMoveRect.top - translateY  + (elementToMoveRect.height / 2);
-            let targetRect = document.getElementById(`cell${absdiv(player.pos-1, 40)}`).getBoundingClientRect();
-            let targetCenterX = targetRect.left + (targetRect.width / 2);
-            let targetCenterY = targetRect.top + (targetRect.height / 2);
+                count_roll_in_prison = player.count_roll_in_prison;
+                players_positions[player.color]=player.pos
+                if (username===player.username) {
+                    build_allow = player.build_allowed
+                    player_number = player.color
+                }
+                let chip = document.getElementById(`chip${player.color+1}`)
+                let elementToMoveRect = chip.getBoundingClientRect();
+                const computedStyles = window.getComputedStyle(chip);
+                const transformValue = computedStyles.getPropertyValue('transform');
+                const matrix = new DOMMatrix(transformValue);
+                const translateX = matrix.m41;
+                const translateY = matrix.m42;
+                let startX = elementToMoveRect.left -translateX + (elementToMoveRect.width / 2);
+                let startY =elementToMoveRect.top - translateY  + (elementToMoveRect.height / 2);
+                let targetRect = document.getElementById(`cell${absdiv(player.pos-1, 40)}`).getBoundingClientRect();
+                let targetCenterX = targetRect.left + (targetRect.width / 2);
+                let targetCenterY = targetRect.top + (targetRect.height / 2);
 
-            let deltaX = targetCenterX - startX;
-            let deltaY = targetCenterY - startY;
-            // chip.style.transition = 'transform 2s ease-in-out;';
-            chip.style.transform = `translate(${deltaX}px, ${deltaY}px)`;
+                let deltaX = targetCenterX - startX;
+                let deltaY = targetCenterY - startY;
+                // chip.style.transition = 'transform 2s ease-in-out;';
+                chip.style.transform = `translate(${deltaX}px, ${deltaY}px)`;
             }
             else {
                 document.querySelector('.menu').style.display = 'none'
@@ -273,19 +500,37 @@ chatSocket.onopen = function(event) {
         }})
     .then(response => response.json())
     .then(data => {
-        console.log(data)
         for (let i in data) {
             const data_cell = data[parseInt(i)]
              let cell = document.getElementById(`cell${data_cell.pos}`)
+            cell_names.push(data_cell.title)
             if (!cell.classList.contains("special-cell")) {
+                cell.children[1].children[0].children[0].style.backgroundColor = cell.children[1].children[1].classList[cell.children[1].children[1].classList.length - 1]
+                cell.children[1].children[0].children[0].children[0].innerText = data_cell.title
+                cell.children[1].children[0].children[0].children[1].innerText = data_cell.category
+
+                cell.children[1].children[0].children[2].children[0].children[1].children[0].children[1].innerText = data_cell.buy_cost/10
+                cell.children[1].children[0].children[2].children[0].children[1].children[1].children[1].innerText = data_cell.buy_cost/10*5
+                cell.children[1].children[0].children[2].children[0].children[1].children[2].children[1].innerText = data_cell.buy_cost/10*15
+                cell.children[1].children[0].children[2].children[0].children[1].children[3].children[1].innerText = data_cell.buy_cost/10*45
+                cell.children[1].children[0].children[2].children[0].children[1].children[4].children[1].innerText = data_cell.buy_cost/10*120
+                cell.children[1].children[0].children[2].children[0].children[1].children[5].children[1].innerText = data_cell.buy_cost/10*240
+
+                cell.children[1].children[0].children[2].children[0].children[2].children[0].children[1].innerText = data_cell.buy_cost
+                cell.children[1].children[0].children[2].children[0].children[2].children[1].children[1].innerText = data_cell.buy_cost/2
+                cell.children[1].children[0].children[2].children[0].children[2].children[2].children[1].innerText = data_cell.buy_cost/5*3
+                cell.children[1].children[0].children[2].children[0].children[2].children[3].children[1].innerText = Math.round(250 * data_cell.pos/3 / 100) * 100;
+
                 cell.children[0].innerText = data[i].name
                 cell.style.background = colors[data_cell.color]
                 cell.title = data_cell.color !== 10 ? data_cell.color : ""
                 cell.children[1].children[1].children[0].innerText = data_cell.current_cost
-                for (let i=0; i<data_cell.stars;i++) {
-                    cell.children[1].innerHTML += '<div class="star">&#9733;</div>';
+                if (data_cell.stars) {
+                    cell.children[1].children[2].setAttribute("data-stars", `${data_cell.stars}` )
+                    cell.children[1].children[2].children[data_cell.stars-1].style.display = 'block'
                 }
                  if (data_cell.pawn_rounds_remaining) {
+                        cell.children[1].setAttribute("data-pawn", `1` )
                         cell.style.background =  'rgba(0, 0, 0, 0.75)'
                         const round_wrapper = document.createElement('div')
                          const round_number = document.createElement('span')
@@ -302,7 +547,6 @@ chatSocket.onopen = function(event) {
                  }
                 if (data_cell.color === player_number) {
                     companies.push(parseInt(i))
-                    document.querySelector('.pawn').style.background = 'white'
                 }
             }
 
@@ -321,6 +565,7 @@ chatSocket.onopen = function(event) {
         }})
     .then(response => response.json())
     .then(data => {
+        count_deals = data.count_deals
         game_start = data.start_game
         count_doubles = data.count_doubles
         current_player = data.current_player
@@ -336,7 +581,27 @@ chatSocket.onopen = function(event) {
     }).catch(error => {
         console.error('Error:', error);
     });
-
+    let visibility = localStorage.getItem("buy_modal_visibility");
+    if (visibility === "visibility") {
+        document.getElementById('myModal').style.display = 'block';
+    } else {
+        document.getElementById('myModal').style.display = 'none';
+    }
+    let visibility2 = localStorage.getItem("pay_modal_visibility");
+    if (visibility2 === "visibility") {
+        document.getElementById('myModal2').style.display = 'block';
+        setTimeout(pay_rent, 1000);
+    } else {
+        document.getElementById('myModal2').style.display = 'none';
+    }
+     let visibility3 = localStorage.getItem("random_cell_modal_visibility");
+    if (visibility3 === "visibility") {
+        document.getElementById('modal-pay').style.display = 'block';
+        setTimeout(random_cell, 1000);
+    } else {
+        document.getElementById('modal-pay').style.display = 'none';
+    }
+    for (let i=0;i<max_players;i++) players.push(i)
 };
 
 function setDarkScreen() {
@@ -405,12 +670,10 @@ chatSocket.onmessage = (event) => {
             seconds = data.time[2]
         }
         if (data.next_player) {
-            console.log('aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa', current_player)
             document.getElementById(`player${current_player}`).style.border = 'none'
             update_current_player()
             choosen_player = document.getElementById(`player${current_player}`)
             choosen_player.style.border = '2px solid white'
-            console.log('bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb', current_player)
             // if (!count_doubles) next_player();
             document.querySelector('.menu').style.display = player_number===current_player ? 'block' : 'none'
         }
@@ -437,7 +700,6 @@ chatSocket.onmessage = (event) => {
 
     })
         if (players_count===1) {
-            console.log('win')
             const modal = document.getElementById('winModel')
             modal.style.display = 'block'
         }
@@ -460,17 +722,30 @@ chatSocket.onmessage = (event) => {
     }
     else if (data.type==='build') {
         let cell = document.getElementById(`cell${data.cell}`)
-        cell.children[1].innerHTML += '<div class="star">&#9733;</div>';
+        if (data.stars > 1) {
+            cell.children[1].children[2].children[data.stars-2].style.display = 'none'
+        }
+        cell.children[1].children[2].children[data.stars-1].style.display = 'block'
+        update_cell(data.cell)
+    }
+    else if (data.type==='sell') {
+        let cell = document.getElementById(`cell${data.cell}`)
+        if (data.stars > 1) {
+            cell.children[1].children[2].children[data.stars-1].style.display = 'block'
+        }
+        cell.children[1].children[2].children[data.stars].style.display = 'none'
+        update_cell(data.cell)
+
     }
      else if (data.type==='pawn') {
-         const cell = document.getElementById(data.company);
+         const cell = document.getElementById(`cell${data.company}`);
          cell.style.background =  'rgba(0, 0, 0, 0.75)'
             const round_wrapper = document.createElement('div')
              const round_number = document.createElement('span')
              round_wrapper.classList.add('oval')
              round_number.classList.add('number')
              round_number.innerText = '15';
-            const id = data.company.slice(4)
+            const id = data.company
              if (id>9 && id<20) round_wrapper.style.transform =  'translate(0%, 60%) rotate(270deg)'
              if (id>19 && id<30) round_wrapper.style.transform =  'translate(20%, 20%) rotate(0deg)'
              if (id>29 && id<40) round_wrapper.style.transform =  'translate(180%, 50%) rotate(90deg)'
@@ -478,6 +753,12 @@ chatSocket.onmessage = (event) => {
              cell.children[1].appendChild(round_wrapper)
             cell.children[1].children[1].children[0].innerText = 0;
              // users_update()
+    }
+     else if (data.type==='unpawn') {
+         const cell = document.getElementById(`cell${data.cell}`);
+         cell.style.background =  colors[current_player]
+         cell.children[1].children[3].remove()
+        update_cell(data.cell)
     }
      else if (data.type==='display_window') {
        document.querySelector('.menu').style.display = 'block'
@@ -545,8 +826,11 @@ chatSocket.onmessage = (event) => {
      else if (data.type==='deal_suggest') {
         const deal_data = data
         const user_cells = document.querySelectorAll('.deal-company')[2]
+        user_cells.innerHTML = ''
         const enemy_cells = document.querySelectorAll('.deal-company')[3]
+        enemy_cells.innerHTML = ''
         const modal = document.getElementById('deal-suggest')
+        const close_btn = document.querySelector('.deal-close-suggest')
         modal.style.display = 'block'
         document.querySelectorAll('.deal-suggest-money')[0].innerText = deal_data.my_money
         document.querySelectorAll('.deal-suggest-money')[1].innerText = deal_data.enemy_money
@@ -589,7 +873,7 @@ chatSocket.onmessage = (event) => {
                     'enemy': data.enemy}));
                     chatSocket.send(JSON.stringify({
             'type':'chat_message',
-            'message': `${data.enemy} 'согласился на сделку`}));
+            'message': `согласился на сделку игрока ${document.getElementById(`player${data.player}`).children[1].innerText}`}));
                     console.log(dat);
                 })
                 .catch(error => {
@@ -598,7 +882,13 @@ chatSocket.onmessage = (event) => {
             this.removeEventListener('click', deal_accept)
         }
         deal_btn.addEventListener('click', deal_accept)
-        // users_update()
+        console.log(close_btn)
+        close_btn.addEventListener('click', function () {
+            modal.style.display = 'none';
+            chatSocket.send(JSON.stringify({
+            'type':'chat_message',
+            'message': `Отказался от сделки игрока ${document.getElementById(`player${data.player}`).children[1].innerText}`}));
+        })
     }
      else if (data.type==='deal_accept') {
 
@@ -624,11 +914,7 @@ chatSocket.onmessage = (event) => {
                     companies = companies.filter(item => item !== parseInt(id.slice(4)))
                 }
             })
-        // if (player_number===parseInt(data.enemy) || player_number===parseInt(data.player)) {
-        //
-        // }
         if (check_monopoly()) {
-            document.querySelector('.build').style.background = 'white';
             chatSocket.send(JSON.stringify({
                     'type':'monopoly_view',
                     'cells': monopoly,
@@ -670,10 +956,18 @@ function view_for_monopoly(cells){
 
 function view_for_buy_company(cell_pos, target) {
     let cell = document.getElementById(`cell${cell_pos}`)
-    if (target) cell.style.background = colors[target];
-    else cell.style.background = colors[current_player];
-    cell.title = `${current_player}`
-    cell.children[1].children[1].children[0].innerText = parseInt(cell.children[1].children[1].children[0].innerText)/10
+    if (target) {
+        if (player_number===parseInt(target)) {
+                    companies.push(parseInt(id.slice(4)))
+                }
+        cell.style.background = colors[target];
+        cell.title = `${target}`
+    }
+    else {
+        cell.style.background = colors[current_player];
+        cell.title = `${current_player}`
+    }
+    update_cell(cell_pos)
     // users_update()
 }
 
@@ -706,9 +1000,6 @@ function auction_buy(price, player, cell) {
             'cells': monopoly,
             }));
         }
-         if (monopoly.length>0) {
-            document.querySelector('.build').style.background = 'white';
-        }
     })
     .catch(error => {
         console.error('Error:', error);
@@ -719,7 +1010,7 @@ function auction_buy(price, player, cell) {
 function prison() {
     const chip = document.getElementById(`chip${current_player + 1}`);
     let buy = document.querySelector('.prison-buy');
-    buy.style.background = 'white';
+    buy.style.display = 'block';
     let elementToMoveRect = chip.getBoundingClientRect();
     const computedStyles = window.getComputedStyle(chip);
     const transformValue = computedStyles.getPropertyValue('transform');
@@ -782,7 +1073,7 @@ document.querySelector('.prison-buy').onclick = function () {
                          console.log(data);
                          in_prison = false;
                          let buy = document.querySelector('.prison-buy');
-                         buy.style.background = 'black';
+                         buy.style.display = 'none';
 
                      })
                      .catch(error => {
@@ -819,10 +1110,7 @@ function openModalBuild() {
                         // users_update()
                         update_cell(company.id.slice(4))
                         console.log(data);
-                        // stars = true;
-                        document.querySelector('.build').style.background = 'black';
                         modal.style.display = "none";
-                        document.querySelector('.sell').style.background = 'white';
                         company.onclick = null
                         chatSocket.send(JSON.stringify({
                             'type':'build',
@@ -899,7 +1187,6 @@ function openModal() {
 
              if (!(pawns.includes(company))) {
                  pawns.push(company)
-                 document.querySelector('.unpawn').style.background = 'white'
                  let data = {
                      room_name: room_name,
                      cell: id
@@ -973,43 +1260,43 @@ function openModalBankrupt() {
         }));
 }
 
-function openModalUnPawn() {
-    var modal = document.getElementById("myModal2");
-    modal.style.display = "block";
-    companies.forEach(id => {
-        let company = document.getElementById(`cell${id}`)
-        company.style.zIndex = '2';
-         company.onclick = function () {
-
-
-            if ((pawns.includes(company))){
-                console.log(company)
-                pawns = pawns.filter(element => element !== company);
-                company.style.background = 'rgba(0, 0, 0, 0)'
-                update_cell(company.id.slice(4))
-             let data = {
-                    room_name: room_name,
-                    cell: id
-                     };
-                fetch('../../game/unpawn/', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'X-CSRFToken': getCookie('csrftoken')
-                    },
-                    body: JSON.stringify(data)
-                })
-                    .then(response => response.json())
-                    .then(data => {
-                        // users_update()
-                    })
-                    .catch(error => {
-                        console.error('Error:', error);
-                    });
-            }
-        }
-    })
-}
+// function openModalUnPawn() {
+//     var modal = document.getElementById("myModal2");
+//     modal.style.display = "block";
+//     companies.forEach(id => {
+//         let company = document.getElementById(`cell${id}`)
+//         company.style.zIndex = '2';
+//          company.onclick = function () {
+//
+//
+//             if ((pawns.includes(company))){
+//                 console.log(company)
+//                 pawns = pawns.filter(element => element !== company);
+//                 company.style.background = 'rgba(0, 0, 0, 0)'
+//                 update_cell(company.id.slice(4))
+//              let data = {
+//                     room_name: room_name,
+//                     cell: id
+//                      };
+//                 fetch('../../game/unpawn/', {
+//                     method: 'POST',
+//                     headers: {
+//                         'Content-Type': 'application/json',
+//                         'X-CSRFToken': getCookie('csrftoken')
+//                     },
+//                     body: JSON.stringify(data)
+//                 })
+//                     .then(response => response.json())
+//                     .then(data => {
+//                         // users_update()
+//                     })
+//                     .catch(error => {
+//                         console.error('Error:', error);
+//                     });
+//             }
+//         }
+//     })
+// }
 function openModalDeal() {
     const open_modal = document.getElementById("myModal2");
     open_modal.style.display  = 'block'
@@ -1049,12 +1336,12 @@ function openModalDeal() {
 
     close.addEventListener('click', closeModal);
     function click_btn() {
+        count_deals++;
          modal.style.display = 'none';
         removeEventListeners();
 
         const content = my_companies.textContent;
         const content2 = no_my_companies.textContent;
-
         const dataEnemyCells = Array.from(choosen_company2).map(company => company.id);
         const dataUserCells = Array.from(choosen_company1).map(company => company.id.slice(4));
         chatSocket.send(JSON.stringify({
@@ -1067,6 +1354,10 @@ function openModalDeal() {
             'all_enemy_money':right_money.textContent,
             'my_companies':dataUserCells,
             'enemy_companies':dataEnemyCells,
+        }));
+        chatSocket.send(JSON.stringify({
+            'type': 'chat_message',
+            'message': `Предложил сделку игроку ${document.getElementById(`player${enemy_color}`).children[1].innerText}`,
         }));
         this.removeEventListener('click', click_btn)
     }
@@ -1258,6 +1549,7 @@ function openModalDeal() {
 }
 
 document.getElementById('btn-auction').onclick = function () {
+    localStorage.setItem("buy_modal_visibility", "hidden");
     document.getElementById('myModal').style.display = 'none';
     document.getElementById('auction').style.display = 'block';
     auction_players = []
@@ -1333,7 +1625,7 @@ function casino() {
         resetModal();
         chatSocket.send(JSON.stringify({
             'type': 'chat_message',
-            'message': ` отказался играть`,
+            'message': ` отказался играть в казино`,
             'next_player': count_doubles===0
         }));
     };
@@ -1385,7 +1677,7 @@ function getRandomInt(min, max) {
 
 document.getElementById('rollButton').addEventListener('click', function() {
     document.querySelector('.menu').style.display = 'none'
-    const dices = [getRandomInt(1,6), getRandomInt(1,6)]
+    const dices =[getRandomInt(1,6), getRandomInt(1,6)]
     // [getRandomInt(1,6), getRandomInt(1,6)]
     if (!in_prison || (in_prison && dices[0]===dices[1]) || count_roll_in_prison===3) {
             if (in_prison && dices[0]===dices[1]) {
@@ -1393,6 +1685,7 @@ document.getElementById('rollButton').addEventListener('click', function() {
                     'type': 'chat_message',
                     'message': ` выбросил дубль  и выходит из тюрьмы`,
                 }));
+
             }
             in_prison=false
             count_roll_in_prison = 0
@@ -1431,14 +1724,15 @@ document.getElementById('rollButton').addEventListener('click', function() {
         else {
              chatSocket.send(JSON.stringify({
                     'type': 'chat_message',
-                    'message': `не  выбросил дубль`,
+                    'message': `не  выбросил дубль и остался в тюрьме`,
                     'next_player': true
                 }));
         }
         if (dices[0]===dices[1] && !in_prison) {
+            document.querySelector('.menu').style.display = 'block'
             chatSocket.send(JSON.stringify({
                     'type': 'chat_message',
-                    'message': `выбросил  дубль`,
+                    'message': `выбросил  дубль и получил дополнительный ход`,
                 }));
             count_doubles++;
             if (count_doubles===3) {
@@ -1500,7 +1794,6 @@ function chatMessage() {
 const config = { childList: true, subtree: true, characterData: true };
 
 function choice() {
-     if (monopoly.length>0) document.querySelector('.build').style.background = 'white';
      let cell_pos = absdiv(players_positions[current_player] - 1, 40)
      let cell = document.getElementById(`cell${cell_pos}`);
      const buy_btn = document.getElementById('buy')
@@ -1529,16 +1822,12 @@ function choice() {
      }
     else if (!cell.classList.contains("special-cell") && cell_pos !== 10) {
         document.getElementById('myModal').style.display = 'block';
+        localStorage.setItem("buy_modal_visibility", "visibility");
         buy_btn.onclick = function () {
-        let pawn = document.querySelector(".pawn")
         companies.push(cell_pos);
-        pawn.style.background = "white";
 
             buy_company(cell_pos)
-            // companies.push(cell);
-            // let pawn = document.querySelector(".pawn")
-            // pawn.style.background = "white";
-            // if (cell<0) cell=39;
+
         }}
         else if (cell_pos!==0 && cell_pos !== 10){
             random_cell()
@@ -1556,8 +1845,14 @@ function choice() {
     //      'player':(current_player+1)%players_count}));
 
 }
+document.getElementById('buy').onclick = function () {
+        companies.push(players_positions[current_player]-1);
 
+            buy_company(players_positions[current_player]-1)
+
+        }
 function random_cell() {
+            localStorage.setItem("random_cell_modal_visibility", 'visibility');
             document.getElementById('myModal').style.display = 'none';
             const modal = document.getElementById('modal-pay')
             modal.style.display = 'block'
@@ -1565,11 +1860,12 @@ function random_cell() {
             pay_btn.disabled = 1000 > parseInt(player_money.innerText)
             let prize = [-1000,1000][getRandomInt(0,1)]
     function pay_click() {
+                localStorage.setItem("random_cell_modal_visibility", 'hidden');
                 modal.style.display = 'none'
      let data = {
                 'active': parseInt(document.getElementById(`player${current_player}`).children[2].innerText)+prize,
             };
-            let message = prize > 0 ?  'получить 1000' : 'проебать 1000'
+            let message = prize > 0 ?  'получил 1000' : 'проебал 1000'
             modal.children[0].children[0].innerText = message
             chatSocket.send(JSON.stringify({
             'type':'chat_message',
@@ -1597,7 +1893,9 @@ function random_cell() {
 
 function buy_company(cell_pos) {
     document.querySelector('.menu').style.display = player_number===current_player ? 'block' : 'none'
+
             document.getElementById('myModal').style.display = 'none';
+            localStorage.setItem("buy_modal_visibility", "hidden");
             let data = {
                 cell: cell_pos,
                 room_name: room_name,
@@ -1618,7 +1916,7 @@ function buy_company(cell_pos) {
                 }));
                     chatSocket.send(JSON.stringify({
                         'type': 'chat_message',
-                        'message': ` купил`,
+                        'message': `купил компанию ${cell_names[cell_pos]}`,
                         'next_player': count_doubles===0
                     }));
                     if (check_monopoly()) {
@@ -1627,9 +1925,7 @@ function buy_company(cell_pos) {
                     'cells': monopoly,
                     }));
                 }
-                if (monopoly.length>0) {
-                document.querySelector('.build').style.background = 'white';
-        }
+
                     console.log(data);
 
                 }).catch(error => {
@@ -1639,6 +1935,7 @@ function buy_company(cell_pos) {
 
 
 function pay_rent(cell_pos) {
+    localStorage.setItem("pay_rent_modal_visibility", 'visibility');
     document.getElementById('myModal').style.display = 'none';
     const modal = document.getElementById('modal-pay')
     modal.style.display = 'block'
@@ -1646,6 +1943,7 @@ function pay_rent(cell_pos) {
     pay_btn.disabled = parseInt(document.getElementById(`cell${cell_pos}`).children[1].children[1].children[0].innerText) > parseInt(player_money.innerText)
     const cell = document.getElementById(`cell${cell_pos}`)
     function pay_click() {
+        localStorage.setItem("pay_rent_modal_visibility", 'hidden');
         modal.style.display = 'none'
          let data = {
             'room_name': room_name,
@@ -1666,7 +1964,7 @@ function pay_rent(cell_pos) {
         chatSocket.send(JSON.stringify({
         'type':'chat_message',
             'next_player': count_doubles===0,
-        'message':`заплатил аренду`}));
+        'message':`заплатил аренду ${cell.children[1].children[1].children[0].innerText}`}));
     })
     .catch(error => {
         console.error('Error:', error);
@@ -1759,46 +2057,13 @@ function money_for_round() {
     .then(response => response.json())
     .then(data => {
         console.log(data);
+        if (current_player===player_number) chatSocket.send(JSON.stringify({
+        'type':'chat_message',
+        'message':`Прошёл круг и получил 2000`}));
     }).catch(error => {
         console.error('Error:', error);
     });
 }
-
-
-
-
-
-document.querySelector('.btn').onclick = function () {
-}
-// const dataToUpdate = {
-//     'name': 'room1',
-//     'round': 100,
-//     'players_count': 4,
-// };
-//
-//
-// fetch(`http://127.0.0.1:8000/api/rooms/${222}/`, {
-//     method: 'PUT',
-//     headers: {
-//         'Content-Type': 'application/json',
-//         'X-CSRFToken': getCookie('csrftoken'),
-//     },
-//     body: JSON.stringify(dataToUpdate),
-// })
-//     .then(response => response.json())
-//     .then(data => {
-//         console.log(data);
-//     })
-//     .catch(error => {
-//         console.error('Error:', error);
-//     });
-// }
-
-
-
-
-
-
 
 
 function users_update() {
@@ -1839,7 +2104,6 @@ function update_cell(id) {
         }})
     .then(response => response.json())
     .then(data => {
-        console.log(data[0].current_cost)
         let cell = document.getElementById(`cell${data[0].pos}`)
        cell.children[1].children[1].children[0].innerText = data[0].current_cost
     }).catch(error => {
@@ -1861,7 +2125,7 @@ function dice_animation(number1,number2) {
 function start() {
     game_start = true
     document.querySelector('.menu').style.display = player_number===current_player ? 'block' : 'none'
-    document.getElementById(`player${0}`).style.border = 'none'
+    document.getElementById(`player${0}`).style.border = '1px solid white'
     // document.getElementById(`player${0}`).style.backgroundColor = colors[0]
     //  fetch(`../../api/cells/?room__name=${room_name}`,{
     //     method: 'GET',

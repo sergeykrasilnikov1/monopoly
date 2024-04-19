@@ -1,0 +1,235 @@
+[
+  {
+    "position": 0,
+    "title": "Start",
+    "category": "Special_cell"
+  },
+  {
+    "position": 1,
+    "title": "Пятёрочка",
+    "category": "Магазин",
+    "cost": 100
+  },
+  {
+    "position": 2,
+    "title": "Магнит",
+    "category": "Магазин",
+    "cost": 150
+  },
+  {
+    "position": 3,
+    "title": "Магнит",
+    "category": "Магазин",
+    "cost": 150
+  },
+  {
+    "position": 4,
+    "title": "ФНС",
+    "category": "Государство",
+    "cost": 200
+  },
+  {
+    "position": 5,
+    "title": "Татнефть",
+    "category": "Газ",
+    "cost": 250
+  },
+  {
+    "position": 6,
+    "title": "Тинькофф",
+    "category": "Банк",
+    "cost": 300
+  },{
+    "position": 7,
+    "title": "Пятёрочка",
+    "category": "Магазин",
+    "cost": 100
+  },
+  {
+    "position": 8,
+    "title": "Альфа-банк",
+    "category": "Банк",
+    "cost": 350
+  },
+  {
+    "position": 9,
+    "title": "Сбербанк",
+    "category": "Банк",
+    "cost": 400
+  },
+  {
+    "position": 10,
+    "title": "prison",
+    "category": "Special_cell"
+  },
+  {
+    "position": 11,
+    "title": "Пятёрочка",
+    "category": "Магазин",
+    "cost": 100
+  },
+  {
+    "position": 12,
+    "title": "Магннит",
+    "category": "Магазин",
+    "cost": 150
+  },
+  {
+    "position": 13,
+    "title": "Пятёрочка",
+    "category": "Магазин",
+    "cost": 100
+  },
+  {
+    "position": 14,
+    "title": "Магннит",
+    "category": "Магазин",
+    "cost": 150
+  },
+  {
+    "position": 15,
+    "title": "Пятёрочка",
+    "category": "Магазин",
+    "cost": 100
+  },
+  {
+    "position": 16,
+    "title": "Магннит",
+    "category": "Магазин",
+    "cost": 150
+  },{
+    "position": 17,
+    "title": "Пятёрочка",
+    "category": "Магазин",
+    "cost": 100
+  },
+  {
+    "position": 18,
+    "title": "Магннит",
+    "category": "Магазин",
+    "cost": 150
+  },
+  {
+    "position": 19,
+    "title": "Пятёрочка",
+    "category": "Магазин",
+    "cost": 100
+  },
+  {
+    "position": 20,
+    "title": "casino",
+    "category": "Special_cell"
+  },
+  {
+    "position": 21,
+    "title": "Пятёрочка",
+    "category": "Магазин",
+    "cost": 100
+  },
+  {
+    "position": 22,
+    "title": "Магннит",
+    "category": "Магазин",
+    "cost": 150
+  },
+  {
+    "position": 23,
+    "title": "Пятёрочка",
+    "category": "Магазин",
+    "cost": 100
+  },
+  {
+    "position": 24,
+    "title": "Магннит",
+    "category": "Магазин",
+    "cost": 150
+  },
+  {
+    "position": 25,
+    "title": "Пятёрочка",
+    "category": "Магазин",
+    "cost": 100
+  },
+  {
+    "position": 26,
+    "title": "Магннит",
+    "category": "Магазин",
+    "cost": 150
+  },{
+    "position": 27,
+    "title": "Пятёрочка",
+    "category": "Магазин",
+    "cost": 100
+  },
+  {
+    "position": 28,
+    "title": "Магннит",
+    "category": "Магазин",
+    "cost": 150
+  },
+  {
+    "position": 29,
+    "title": "Пятёрочка",
+    "category": "Магазин",
+    "cost": 100
+  },
+  {
+    "position": 30,
+    "title": "go_to_prison",
+    "category": "Special_cell"
+  },
+  {
+    "position": 31,
+    "title": "Пятёрочка",
+    "category": "Магазин",
+    "cost": 100
+  },
+  {
+    "position": 32,
+    "title": "Магннит",
+    "category": "Магазин",
+    "cost": 150
+  },
+  {
+    "position": 33,
+    "title": "Пятёрочка",
+    "category": "Магазин",
+    "cost": 100
+  },
+  {
+    "position": 34,
+    "title": "Магннит",
+    "category": "Магазин",
+    "cost": 150
+  },
+  {
+    "position": 35,
+    "title": "Пятёрочка",
+    "category": "Магазин",
+    "cost": 100
+  },
+  {
+    "position": 36,
+    "title": "Магннит",
+    "category": "Магазин",
+    "cost": 150
+  },{
+    "position": 37,
+    "title": "Пятёрочка",
+    "category": "Магазин",
+    "cost": 100
+  },
+  {
+    "position": 38,
+    "title": "Магннит",
+    "category": "Магазин",
+    "cost": 150
+  },
+  {
+    "position": 39,
+    "title": "Пятёрочка",
+    "category": "Магазин",
+    "cost": 100
+  }
+
+]
