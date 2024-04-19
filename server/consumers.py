@@ -266,6 +266,15 @@ class ChatConsumer(AsyncWebsocketConsumer):
                 }
             )
 
+        elif (message_type == 'unpawn'):
+            await self.channel_layer.group_send(
+                self.room_group_name,
+                {
+                    'type': 'unpawn',
+                    'cell': text_data_json.get('cell'),
+                }
+            )
+
         elif (message_type == 'monopoly_view'):
             await self.channel_layer.group_send(
                 self.room_group_name,
@@ -290,6 +299,17 @@ class ChatConsumer(AsyncWebsocketConsumer):
                 {
                     'type': 'build',
                     'cell': text_data_json.get('cell'),
+                    'stars': text_data_json.get('stars')
+                }
+            )
+
+        elif (message_type == 'sell'):
+            await self.channel_layer.group_send(
+                self.room_group_name,
+                {
+                    'type': 'sell',
+                    'cell': text_data_json.get('cell'),
+                    'stars': text_data_json.get('stars')
                 }
             )
 
@@ -383,7 +403,9 @@ class ChatConsumer(AsyncWebsocketConsumer):
 
     async def deal_suggest(self, event):
         # Отправляем сообщение обратно через WebSocket
-        print(self.connected_clients)
+        room = await database_sync_to_async(Room.objects.get)(name=self.room_name)
+        room.count_deals += 1
+        await database_sync_to_async(room.save)()
         await self.send(text_data=json.dumps(
             {
                 'type': 'deal_suggest',
@@ -445,6 +467,18 @@ class ChatConsumer(AsyncWebsocketConsumer):
             }
         ))
 
+    async def unpawn(self, event):
+        # Отправляем сообщение обратно через WebSocket
+        await self.send(text_data=json.dumps(
+            {
+                'type': 'unpawn',
+                'cell': event['cell'],
+                "online": f"{self.user_count()}",
+                "users": [f"{user.scope['user']} {user.user.passive} {user.user.active}" for user in
+                          self.connected_clients[self.room_name]],
+            }
+        ))
+
     async def monopoly_view(self, event):
         # Отправляем сообщение обратно через WebSocket
         await self.send(text_data=json.dumps(
@@ -474,6 +508,20 @@ class ChatConsumer(AsyncWebsocketConsumer):
         await self.send(text_data=json.dumps(
             {
                 'type': 'build',
+                'stars': event['stars'],
+                'cell': event['cell'],
+                "online": f"{self.user_count()}",
+                "users": [f"{user.scope['user']} {user.user.passive} {user.user.active}" for user in
+                          self.connected_clients[self.room_name]],
+            }
+        ))
+
+    async def sell(self, event):
+        # Отправляем сообщение обратно через WebSocket
+        await self.send(text_data=json.dumps(
+            {
+                'type': 'sell',
+                'stars': event['stars'],
                 'cell': event['cell'],
                 "online": f"{self.user_count()}",
                 "users": [f"{user.scope['user']} {user.user.passive} {user.user.active}" for user in

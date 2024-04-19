@@ -11,6 +11,7 @@ class Room(models.Model):
     current_player = models.SmallIntegerField(default=0)
     start_game = models.BooleanField(default=False)
     count_doubles = models.PositiveSmallIntegerField(default=0)
+    count_deals = models.PositiveSmallIntegerField(default=0)
 
     def __str__(self):
         return self.name
@@ -28,6 +29,7 @@ class User(AbstractUser):
     room = models.ForeignKey(Room, on_delete=models.SET(None), null=True, blank=True)
     image = models.ImageField(upload_to='users_images', null=True, blank=True)
     lose = models.BooleanField(default=False)
+    build_allowed = models.BooleanField(default=False)
     # self.cells = []
 
     # def __str__(self):
@@ -37,7 +39,9 @@ class User(AbstractUser):
 class Cell(models.Model):
     room = models.ForeignKey(Room, on_delete=models.CASCADE, null=True)
     owner = models.ForeignKey(User, on_delete=models.CASCADE, null=True)
+    title = models.CharField(max_length=50)
     name = models.CharField(max_length=100)
+    category = models.CharField(max_length=50)
     # group_colors = models.PositiveIntegerField(default=0)
     # build_cost = models.JSONField()
     current_cost = models.PositiveIntegerField(default=0)
