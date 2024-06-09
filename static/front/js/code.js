@@ -388,7 +388,7 @@ function endRound() {
             let cell = document.getElementById(`cell${data_cell.pos}`)
             if (cell) {
                 const rounds_remained = data_cell.pawn_rounds_remained
-                 cell.children[1].children[2].children[0].innerText = rounds_remained
+                 if(rounds_remained) cell.children[1].children[2].children[0].innerText = rounds_remained
                 if (rounds_remained===1) {
                     cell.title = ''
                     cell.style.background = 'white'
@@ -431,7 +431,7 @@ let chatSocket = new WebSocket(`ws://${window.location.host}/ws${window.location
 //     messageInputDom.value = '';
 // };
 
-const presenceEl = document.getElementById('pre_cnt');
+// const presenceEl = document.getElementById('pre_cnt');
 const messageOutput = document.getElementById('message-output');
 
 
@@ -454,6 +454,7 @@ chatSocket.onopen = function(event) {
             let player = data[i]
             if (!player.lose){
                 in_prison = player.in_prison
+                if (in_prison) document.querySelector('.prison-buy').style.display = 'block';
                 count_roll_in_prison = player.count_roll_in_prison;
                 players_positions[player.color]=player.pos
                 if (username===player.username) {
@@ -510,11 +511,11 @@ chatSocket.onopen = function(event) {
                 cell.children[1].children[0].children[0].children[1].innerText = data_cell.category
 
                 cell.children[1].children[0].children[2].children[0].children[1].children[0].children[1].innerText = data_cell.buy_cost/10
-                cell.children[1].children[0].children[2].children[0].children[1].children[1].children[1].innerText = data_cell.buy_cost/10*5
-                cell.children[1].children[0].children[2].children[0].children[1].children[2].children[1].innerText = data_cell.buy_cost/10*15
-                cell.children[1].children[0].children[2].children[0].children[1].children[3].children[1].innerText = data_cell.buy_cost/10*45
-                cell.children[1].children[0].children[2].children[0].children[1].children[4].children[1].innerText = data_cell.buy_cost/10*120
-                cell.children[1].children[0].children[2].children[0].children[1].children[5].children[1].innerText = data_cell.buy_cost/10*240
+                cell.children[1].children[0].children[2].children[0].children[1].children[1].children[1].innerText = data_cell.buy_cost/10*3
+                cell.children[1].children[0].children[2].children[0].children[1].children[2].children[1].innerText = data_cell.buy_cost/10*10
+                cell.children[1].children[0].children[2].children[0].children[1].children[3].children[1].innerText = data_cell.buy_cost/10*25
+                cell.children[1].children[0].children[2].children[0].children[1].children[4].children[1].innerText = data_cell.buy_cost/10*45
+                cell.children[1].children[0].children[2].children[0].children[1].children[5].children[1].innerText = data_cell.buy_cost/10*65
 
                 cell.children[1].children[0].children[2].children[0].children[2].children[0].children[1].innerText = data_cell.buy_cost
                 cell.children[1].children[0].children[2].children[0].children[2].children[1].children[1].innerText = data_cell.buy_cost/2
@@ -654,7 +655,7 @@ chatSocket.onmessage = (event) => {
 
     users_update()
     let data = JSON.parse(event.data)
-    presenceEl.innerHTML = data.online;
+    // presenceEl.innerHTML = data.online;
     // players_count = parseInt(data.online);
     if (data.type==='start') start();
     else if (data.type === 'init_data') {
@@ -701,7 +702,10 @@ chatSocket.onmessage = (event) => {
     })
         if (players_count===1) {
             const modal = document.getElementById('winModel')
+
             modal.style.display = 'block'
+            document.querySelector(".win-model-description").innerText += " " + data.users[players[0]]
+
         }
     }
 
@@ -1009,8 +1013,6 @@ function auction_buy(price, player, cell) {
 
 function prison() {
     const chip = document.getElementById(`chip${current_player + 1}`);
-    let buy = document.querySelector('.prison-buy');
-    buy.style.display = 'block';
     let elementToMoveRect = chip.getBoundingClientRect();
     const computedStyles = window.getComputedStyle(chip);
     const transformValue = computedStyles.getPropertyValue('transform');
@@ -1677,7 +1679,8 @@ function getRandomInt(min, max) {
 
 document.getElementById('rollButton').addEventListener('click', function() {
     document.querySelector('.menu').style.display = 'none'
-    const dices =[getRandomInt(1,6), getRandomInt(1,6)]
+    // const dices =[getRandomInt(1,6), getRandomInt(1,6)]
+    const dices =[30, 0]
     // [getRandomInt(1,6), getRandomInt(1,6)]
     if (!in_prison || (in_prison && dices[0]===dices[1]) || count_roll_in_prison===3) {
             if (in_prison && dices[0]===dices[1]) {
@@ -1738,6 +1741,7 @@ document.getElementById('rollButton').addEventListener('click', function() {
             if (count_doubles===3) {
                 count_doubles=0
                 in_prison=true
+                document.querySelector('.prison-buy').style.display = 'block';
                 setTimeout(function (){
                     chatSocket.send(JSON.stringify({
                      'type':'prison',
@@ -1804,6 +1808,8 @@ function choice() {
      else if (cell_pos===20) casino();
        else if (cell_pos===30) {
            in_prison = true;
+           let buy = document.querySelector('.prison-buy');
+            buy.style.display = 'block';
            chatSocket.send(JSON.stringify({
              'type':'prison',
              'player':current_player}));
@@ -1940,8 +1946,10 @@ function pay_rent(cell_pos) {
     const modal = document.getElementById('modal-pay')
     modal.style.display = 'block'
     const pay_btn = document.querySelector('.pay-btn')
-    pay_btn.disabled = parseInt(document.getElementById(`cell${cell_pos}`).children[1].children[1].children[0].innerText) > parseInt(player_money.innerText)
     const cell = document.getElementById(`cell${cell_pos}`)
+    pay_btn.innerText = "Заплатить " + cell.children[1].children[1].children[0].innerText
+    pay_btn.disabled = parseInt(cell.children[1].children[1].children[0].innerText) > parseInt(player_money.innerText)
+
     function pay_click() {
         localStorage.setItem("pay_rent_modal_visibility", 'hidden');
         modal.style.display = 'none'
@@ -2023,7 +2031,7 @@ async function move_player(dices) {
   let startY = elementToMoveRect.top - translateY + elementToMoveRect.height / 2;
 
   for (let i = current_pos; i < pos; i++) {
-      if (i===40) money_for_round();
+      if (i===40 && current_player===player_number) money_for_round();
     let targetRect = document.getElementById(`cell${i % 40}`).getBoundingClientRect();
     // Вычисляем центр элемента, к которому будем перемещать
     let targetCenterX = targetRect.left + targetRect.width / 2;
@@ -2045,7 +2053,7 @@ async function move_player(dices) {
 function money_for_round() {
     const dataToUpdate = {
     // Your updated data here
-    'active': parseInt(document.getElementById(`player${current_player}`).children[2].innerText)+1000,
+    'active': parseInt(document.getElementById(`player${current_player}`).children[2].innerText)+2000,
 };
     fetch(`../../api/players/${username}/`,{
         method: 'PUT',

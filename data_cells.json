@@ -8,54 +8,54 @@
     "position": 1,
     "title": "Пятёрочка",
     "category": "Магазин",
-    "cost": 100
+    "cost": 600
   },
   {
     "position": 2,
     "title": "Магнит",
     "category": "Магазин",
-    "cost": 150
+    "cost": 600
   },
   {
     "position": 3,
     "title": "Магнит",
     "category": "Магазин",
-    "cost": 150
+    "cost": 600
   },
   {
     "position": 4,
     "title": "ФНС",
     "category": "Государство",
-    "cost": 200
+    "cost": 1000
   },
   {
     "position": 5,
     "title": "Татнефть",
-    "category": "Газ",
-    "cost": 250
+    "category": "Нефть и газ",
+    "cost": 2000
   },
   {
     "position": 6,
     "title": "Тинькофф",
     "category": "Банк",
-    "cost": 300
+    "cost": 1000
   },{
     "position": 7,
     "title": "Пятёрочка",
     "category": "Магазин",
-    "cost": 100
+    "cost": 1000
   },
   {
     "position": 8,
     "title": "Альфа-банк",
     "category": "Банк",
-    "cost": 350
+    "cost": 1000
   },
   {
     "position": 9,
     "title": "Сбербанк",
     "category": "Банк",
-    "cost": 400
+    "cost": 1000
   },
   {
     "position": 10,
@@ -64,56 +64,56 @@
   },
   {
     "position": 11,
-    "title": "Пятёрочка",
-    "category": "Магазин",
-    "cost": 100
+    "title": "Rutube",
+    "category": "Медиа и интернет",
+    "cost": 1400
   },
   {
     "position": 12,
-    "title": "Магннит",
-    "category": "Магазин",
-    "cost": 150
+    "title": "Mundfish",
+    "category": "Государство",
+    "cost": 1500
   },
   {
     "position": 13,
-    "title": "Пятёрочка",
-    "category": "Магазин",
-    "cost": 100
+    "title": "Вконтакте",
+    "category": "Медиа и интернет",
+    "cost": 1400
   },
   {
     "position": 14,
-    "title": "Магннит",
-    "category": "Магазин",
-    "cost": 150
+    "title": "Дзен",
+    "category": "Медиа и интернет",
+    "cost": 1600
   },
   {
     "position": 15,
-    "title": "Пятёрочка",
-    "category": "Магазин",
-    "cost": 100
+    "title": "Роснефть",
+    "category": "Нефть и газ",
+    "cost": 2000
   },
   {
     "position": 16,
-    "title": "Магннит",
-    "category": "Магазин",
-    "cost": 150
+    "title": "Балтика",
+    "category": "Пивко",
+    "cost": 1800
   },{
     "position": 17,
     "title": "Пятёрочка",
-    "category": "Магазин",
+    "category": "Пивко",
     "cost": 100
   },
   {
     "position": 18,
-    "title": "Магннит",
-    "category": "Магазин",
-    "cost": 150
+    "title": "Haineken",
+    "category": "Пивко",
+    "cost": 1800
   },
   {
     "position": 19,
-    "title": "Пятёрочка",
-    "category": "Магазин",
-    "cost": 100
+    "title": "Жигули",
+    "category": "Пивко",
+    "cost": 2000
   },
   {
     "position": 20,
@@ -122,56 +122,56 @@
   },
   {
     "position": 21,
-    "title": "Пятёрочка",
-    "category": "Магазин",
-    "cost": 100
+    "title": "S7 Airlines",
+    "category": "Авиакомпания",
+    "cost": 2200
   },
   {
     "position": 22,
     "title": "Магннит",
-    "category": "Магазин",
+    "category": "Авиакомпания",
     "cost": 150
   },
   {
     "position": 23,
-    "title": "Пятёрочка",
-    "category": "Магазин",
-    "cost": 100
+    "title": "Россия",
+    "category": "Авиакомпания",
+    "cost": 2200
   },
   {
     "position": 24,
-    "title": "Магннит",
-    "category": "Магазин",
-    "cost": 150
+    "title": "Аэрофлот",
+    "category": "Авиакомпания",
+    "cost": 2400
   },
   {
     "position": 25,
-    "title": "Пятёрочка",
-    "category": "Магазин",
-    "cost": 100
+    "title": "Лукойл",
+    "category": "Нефть и газ",
+    "cost": 2000
   },
   {
     "position": 26,
-    "title": "Магннит",
-    "category": "Магазин",
-    "cost": 150
+    "title": "Теремок",
+    "category": "Еда",
+    "cost": 2600
   },{
     "position": 27,
-    "title": "Пятёрочка",
-    "category": "Магазин",
-    "cost": 100
+    "title": "Ёбидоёби",
+    "category": "Еда",
+    "cost": 2600
   },
   {
     "position": 28,
-    "title": "Магннит",
-    "category": "Магазин",
-    "cost": 150
+    "title": "Wargaming.net",
+    "category": "Государство",
+    "cost": 1500
   },
   {
     "position": 29,
-    "title": "Пятёрочка",
-    "category": "Магазин",
-    "cost": 100
+    "title": "Додо пицца",
+    "category": "Еда",
+    "cost": 2800
   },
   {
     "position": 30,
@@ -180,56 +180,56 @@
   },
   {
     "position": 31,
-    "title": "Пятёрочка",
-    "category": "Магазин",
-    "cost": 100
+    "title": "Ситилинк",
+    "category": "Техника",
+    "cost": 3000
   },
   {
     "position": 32,
-    "title": "Магннит",
-    "category": "Магазин",
-    "cost": 150
+    "title": "МВидео",
+    "category": "Техника",
+    "cost": 3000
   },
   {
     "position": 33,
-    "title": "Пятёрочка",
-    "category": "Магазин",
+    "title": "DNS",
+    "category": "Техника",
     "cost": 100
   },
   {
     "position": 34,
-    "title": "Магннит",
-    "category": "Магазин",
-    "cost": 150
+    "title": "DNS",
+    "category": "Техника",
+    "cost": 3200
   },
   {
     "position": 35,
-    "title": "Пятёрочка",
-    "category": "Магазин",
-    "cost": 100
+    "title": "Газпром",
+    "category": "Нефть и газ",
+    "cost": 2000
   },
   {
     "position": 36,
-    "title": "Магннит",
-    "category": "Магазин",
-    "cost": 150
+    "title": "1С",
+    "category": "Государство",
+    "cost": 1500
   },{
     "position": 37,
-    "title": "Пятёрочка",
-    "category": "Магазин",
-    "cost": 100
+    "title": "КПРФ",
+    "category": "Партия",
+    "cost": 3500
   },
   {
     "position": 38,
-    "title": "Магннит",
-    "category": "Магазин",
-    "cost": 150
+    "title": "КПРФ",
+    "category": "Партия",
+    "cost": 3500
   },
   {
     "position": 39,
-    "title": "Пятёрочка",
-    "category": "Магазин",
-    "cost": 100
+    "title": "Единая Россия",
+    "category": "Партия",
+    "cost": 4000
   }
 
 ]
