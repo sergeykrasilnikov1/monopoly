@@ -27,7 +27,7 @@ class User(AbstractUser):
     monopoly = models.CharField(max_length=20, default='', blank=True)
     creation_datetime = models.DateTimeField(auto_now_add=True, null=True)
     room = models.ForeignKey(Room, on_delete=models.SET(None), null=True, blank=True)
-    image = models.ImageField(upload_to='users_images', null=True, blank=True)
+    image = models.ImageField(upload_to='users_images/', null=True, blank=True)
     lose = models.BooleanField(default=False)
     build_allowed = models.BooleanField(default=False)
     # self.cells = []

@@ -19,11 +19,15 @@
 {#  <h1>Players in Room {{ room.players_count }}</h1>#}
 
 {% endblock %}
+
     <div style="display:none;" class="color">{{ request.user.color }}</div>{{ player_turn }}
     <div class="container">
         <div class="players">
+{#        {% for player in players %}#}
+            
+       
             <div class="player" id="player0">
-            <div class="avatar-frame"> <img class="avatar" src="../../static/front/images/images.jpeg" alt="Avatar"> </div>
+            <div class="avatar-frame"> <img class="avatar" src=" ../../static/front/images/images.jpeg " alt="Avatar"> </div>
             <span class="player-username">{{ player }}</span>
             <span class="player-money">{{ player.active }}</span>
             <span></span>
@@ -32,8 +36,9 @@
                     <button class="player-popup-btn">Банкротство</button>
                 </div>
             </div>
+{#         {% endfor %}#}
              <div class="player" id="player1">
-            <div class="avatar-frame"> <img class="avatar" src="../../static/front/images/images.jpeg" alt="Avatar"> </div>
+            <div class="avatar-frame"> <img class="avatar" src=" ../../static/front/images/images.jpeg" alt="Avatar"> </div>
             <span class="player-username">{{ player }}</span>
             <span class="player-money">{{ player.active }}</span>
             <span></span>
@@ -44,7 +49,7 @@
             </div>
             {% if room.players_count > 2 %}
              <div class="player" id="player2">
-            <div class="avatar-frame"> <img class="avatar" src="../../static/front/images/images.jpeg" alt="Avatar"> </div>
+            <div class="avatar-frame"> <img class="avatar" src=" ../../static/front/images/images.jpeg" alt="Avatar"> </div>
             <span class="player-username">{{ player }}</span>
             <span class="player-money">{{ player.active }}</span>
             <span></span>
@@ -56,7 +61,7 @@
             {% endif %}
             {% if room.players_count > 3 %}
              <div class="player" id="player3">
-            <div class="avatar-frame"> <img class="avatar" src="../../static/front/images/images.jpeg" alt="Avatar"> </div>
+            <div class="avatar-frame"> <img class="avatar" src="{% if request.user.image %} {{ request.user.image.url }} {% else %} ../../static/front/images/images.jpeg {% endif %}" alt="Avatar"> </div>
             <span class="player-username">{{ player }}</span>
             <span class="player-money">{{ player.active }}</span>
             <span></span>
@@ -7608,7 +7613,7 @@
                         <img class="deal-avatar" src="../../static/front/images/images.jpeg" alt="#">
                         <div class="deal-text">
                                 <span class="deal-enemy">Вы</span>
-                                <span>предлагаете</span>
+                                <span>предлагает</span>
                         </div>
                         <img class="deal-cash" src="../../static/front/images/cash1.svg" alt="#">
                         <input id="deal-input2" type="text">
@@ -7646,7 +7651,7 @@
                         <img class="deal-avatar" src="../../static/front/images/images.jpeg" alt="#">
                         <div class="deal-text">
                                 <span class="deal-enemy">Вы</span>
-                                <span>предлагаете</span>
+                                <span>предлагает</span>
                         </div>
                         <img class="deal-cash" src="../../static/front/images/cash1.svg" alt="#">
                         <span class="deal-suggest-money"></span>

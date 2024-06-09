@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Изменение профиля</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.4/css/bulma.min.css">
+</head>
+<body>
+    <h1 class="title">Изменение профиля</h1>
+    <div>
+        <h2>Текущий аватар:</h2>
+            <img src="{% if user.image %} {{ user.image.url }} {% else %} ../../static/front/images/images.jpeg {% endif %}" alt="Аватар" style="">
+    </div>
+    <form method="post" enctype="multipart/form-data">
+    {% csrf_token %}
+	<p>
+    <label for="id_username">Имя:</label>
+    <input type="text" name="username" class="form-control py-4" value="{{ user.username }}" placeholder="{{ user.username }}" autofocus required id="id_username">
+    
+    
+  </p>
+        
+  
+
+
+  
+  <p>
+    <label for="id_image">Изменить аватар</label>
+    <input type="file" name="image" class="form-control py-4" accept="image/*" id="id_image">
+    
+    
+      
+    
+  </p>
+	<button class="button">Сохранить изменения</button>
+</form>
+</body>
+</html>
