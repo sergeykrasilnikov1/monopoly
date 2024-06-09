@@ -21,7 +21,7 @@ from .filter import PlayerFilter, CellFilter
 from .forms import LoginForm, UserRegistrationForm
 from django.shortcuts import render, redirect
 from .forms import RoomCreateForm
-
+from django.contrib import messages
 User = get_user_model()
 
 monopoly = {
@@ -112,6 +112,7 @@ class CellViewSet(viewsets.ModelViewSet):
     #     cell = Cell.objects.filter(room=room1, pos=pos)[0]
     #     serializer = CellSerializer(cell)
     #     return Response(serializer.data)
+
 
 
 class UserLoginView(LoginView):
@@ -396,8 +397,14 @@ def create_room(request):
     if request.method == 'POST':
         form = RoomCreateForm(request.POST)
         if form.is_valid():
-            form.save()
+            print(form.cleaned_data)
+
+
             room_name = form.cleaned_data['name']
+            if Room.objects.filter(name=room_name):
+                messages.error(request, 'Комната с таким название уже существует')
+                return redirect('/create-room/')
+            form.save()
             room = Room.objects.get(name=room_name)
             with open("data_cells.json", 'r') as file:
                 data = json.load(file)

@@ -4,18 +4,58 @@
 <head>
   <meta charset="utf-8" />
   <title>Online Presence Indicator</title>
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.4/css/bulma.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.4/css/bulma.min.css">
 </head>
 
 <body>
+<style>
+    
+    label {
+        display: inline-block;
+        min-width: 90px;
+    }
+    p {
+        margin-bottom: 20px;
+    }
+  </style>  
   <div class="container">
     <section class="section">
-        <h1 class="title">register</h1>
+        <h1 class="title">Регистрация</h1>
 <form method="POST" novalidate>
-	{% csrf_token %}
-	<h2>Sign Up</h2>
-	{{ form.as_p }}
-	<input type="submit" value="Register" />
+    {% csrf_token %}
+	<p>
+    <label for="id_username">Имя:</label>
+    <input type="text" name="username" class="form-control py-4" placeholder="Введите имя пользователя" autofocus required id="id_username">
+    
+    
+  </p>
+
+  
+  <p>
+    <label for="id_email">Email:</label>
+    <input type="email" name="email" class="form-control py-4" placeholder="Введите адрес эл. почты" required id="id_email">
+    
+    
+  </p>
+
+  
+  <p>
+    <label for="id_password1">Пароль:</label>
+    <input type="password" name="password1" class="form-control py-4" placeholder="Введите пароль" required id="id_password1">
+    
+    
+  </p>
+
+  
+  <p>
+    <label for="id_password2">Подтвердить пароль:</label>
+    <input type="password" name="password2" class="form-control py-4" placeholder="Подтвердите пароль" required id="id_password2">
+    
+    
+      
+    
+  </p>
+	<button class="button">Зарегистрироваться</button>
 </form>
     </section>
   </div>

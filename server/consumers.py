@@ -58,8 +58,9 @@ class ChatConsumer(AsyncWebsocketConsumer):
             self.user.room = room
             self.user.color = 0
             self.user.pos = 1
-            self.user.active = 10000
+            self.user.active = 20000
             self.user.lose = False
+            self.user.in_prison = False
             self.user.passive = 20000
             self.user.save()
         self.connected_clients.setdefault(self.room_name, []).append(self)
@@ -72,8 +73,9 @@ class ChatConsumer(AsyncWebsocketConsumer):
                 self.user.color = players_count
                 self.user.pos = 1
                 self.user.lose = False
+                self.user.in_prison = False
                 self.user.room = room
-                self.user.active = 10000
+                self.user.active = 20000
                 self.user.passive = 20000
                 self.user.save()
         self.connected_clients.setdefault(self.room_name, []).append(self)
@@ -146,6 +148,9 @@ class ChatConsumer(AsyncWebsocketConsumer):
             self.room_group_name,
             self.channel_name
         )
+        room = await room_get(self.room_name)
+        if room.start_game and self.user_count() == 0:
+            await database_sync_to_async(room.delete)()
 
     # def get_active_connections(cls, room_group_name):
     #     return cls.channel_layer.group_channels(room_group_name)
@@ -290,6 +295,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
                 {
                     'type': 'bankrupt',
                     'player': text_data_json.get('player'),
+                    # "winner": text_data_json.get('winner'),
                 }
             )
 
@@ -498,7 +504,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
                 'type': 'bankrupt',
                 'player': event['player'],
                 "online": f"{self.user_count()}",
-                "users": [f"{user.scope['user']} {user.user.passive} {user.user.active}" for user in
+                "users": [f"{user.scope['user']}" for user in
                           self.connected_clients[self.room_name]],
             }
         ))

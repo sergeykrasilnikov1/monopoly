@@ -7,41 +7,46 @@
   <meta charset="utf-8" />
   <title>Online Presence Indicator</title>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.4/css/bulma.min.css">
+    <link rel="apple-touch-icon" sizes="180x180" href="{% static 'front/images/apple-touch-icon.png' %}">
+    <link rel="icon" type="image/png" sizes="32x32" href="{% static 'front/images/favicon-32x32.png' %}">
+    <link rel="icon" type="image/png" sizes="16x16" href="{% static 'front/images/favicon-16x16.png' %}">
+    <link rel="manifest" href="{% static 'front/images/site.webmanifest' %}">
 </head>
 
 <body>
-  <div class="container">
-{#      <button class="btn">test</button>#}
-      <button class="room-create"><a href="create-room/">Создать комнату</a></button>
-    <section class="section">
-      <div class="columns">
-        <div class="column">
+ <style>
 
-          {% if user.is_authenticated %}
-          Hello <strong>{{ user }}</strong>
-          <br>
-          <a href="{% url 'logout' %}">Logout</a>
-          {% else %}
-          <a href="{% url 'login' %}">Login</a>
-          {% endif %}
-        <a href="{% url 'register' %}">registration</a>
-          <h1 class="title">Online Presence Indicator</h1>
-          <div id="presence"><span class="tag is-success" id="pre_cnt">0</span> users online</div>
-          <ul id="messages"></ul>
-        </div>
-        <div class="column">
-          <div class="box">
-            <h1 class="title">Online Users</h1>
-            <div id="online-users"></div>
-          </div>
-        </div>
-      </div>
-    </section>
-  </div>
-{#    <a href="{% url 'room' room_name='room1' %}">Chat Room 1</a>#}
-  <h2>Your Model List</h2>
- {% block content %}
-    <style>
+    a {
+        text-decoration: none;
+    }
+    .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 20px;
+            background-color: #f8f8f8;
+            border-bottom: 1px solid #ddd;
+        }
+        .header .title {
+            flex-grow: 1;
+            text-align: center;
+            margin: 0;
+        }
+        .header .buttons {
+            display: flex;
+            gap: 10px;
+        }
+        .header button {
+            padding: 10px 20px;
+            border: none;
+            background-color: #007bff;
+            color: white;
+            cursor: pointer;
+            border-radius: 5px;
+        }
+        .header button:hover {
+            background-color: #0056b3;
+        }
         .room-card {
             border: 1px solid #007bff;
             border-radius: 8px;
@@ -85,13 +90,79 @@
             height: 100%;
             object-fit: cover;
         }
-        
+
         .room-container {
-            width: 50%;
+            width: 100%;
+        }
+
+        .rooms-list {
+            background-color: #f8f8f8;
+            padding: 10px;
+        }
+
+        .rooms-list-top {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 20px;
+            padding: 20px;
+            border-bottom: 1px solid gray;
+        }
+
+        .rooms-list-title {
+            font-size: 25px;
+        }
+
+        .room-create{
+            text-align: center;
+            padding: 10px 20px;
+            border: none;
+            background-color: #007bff;
+            color: white;
+            cursor: pointer;
+            border-radius: 5px;
+        }
+
+        .box {
+            background-color: #f8f8f8;
+        }
+        .player {
+            text-align: center;
+        }
+        .anonim-title {
+            font-size: 50px;
+            text-align: center;
         }
     </style>
-     
+<header class="header">
+        <div class="title">Govnopoly</div>
+        <div class="buttons">
+            {% if user.is_authenticated %}
+                 <strong>{{ user }}</strong>
+            <a href="{% url 'logout' %}">Выйти</a>
+
+            {% else %}
+            <a href="{% url 'login' %}">Войти</a>
+            <a href="{% url 'register' %}">Зарегистрироваться</a>
+            {% endif %}
+        </div>
+    </header>
+  <div class="container-lg">
+
+{#      <button class="btn">test</button>#}
      {% if user.is_authenticated %}
+    <section class="section">
+      <div class="columns">
+        <div class="column">
+        <div class="rooms-list">
+ <div class="rooms-list-top">
+     <h2 class="rooms-list-title" >Доступные комнаты</h2>
+ <a class="room-create" href="create-room/">Создать комнату</a>
+ </div>
+
+{# {% block content %}#}
+
+
+
      <div class="row room-container">
         {% for room in object_list %}
             <div class="col-md-3 mb-4">
@@ -99,27 +170,47 @@
                     <div class="card-header">
                         <h5 class="mb-0">{{ room.name }}</h5>
                     </div>
-                    <div class="card-body">
-                        <p class="card-text">{{ room.description }}</p>
-                    </div>
                     <div class="player-list">
                     {% for player in room.user_set.all %}
-                    <span>{{ player }}</span>
+                        <div class="player">
+                         
                             <div class="player-avatar">
                                 <img src="../../static/front/images/images.jpeg" alt="{{ player.name }}">
                             </div>
+                            <span>{{ player }}</span>
+                        </div>
+
                         {% endfor %}
                      <div class="player-avatar">
                                 <a href="game/{{room.name}}/"><img src="../../static/front/images/plus.png" alt="{{ player.name }}"></a>
                     </div>
-                           
+
                     </div>
                 </div>
             </div>
         {% endfor %}
     </div>
-     {% endif %}
-{% endblock %}
+
+{#{% endblock %}#}
+ </div>
+{#          <h1 class="title">Online Presence Indicator</h1>#}
+{#          <ul id="messages"></ul>#}
+        </div>
+        <div class="column">
+          <div class="box">
+{#              <span id="presence"><span class="tag is-success" id="pre_cnt"></span></span>#}
+            <div class="title">Users Online </div>
+            <div id="online-users"></div>
+          </div>
+        </div>
+      </div>
+    </section>
+         {% else %}
+         <div class="anonim-title">Авторизируйтесь чтобы поиграть</div>
+       {% endif %}
+  </div>
+
+
 
   <script>
 
@@ -131,10 +222,10 @@
     ws.onmessage = (event) => {
       onlineUsers.innerHTML = "";
       let data = JSON.parse(event.data)
-      presenceEl.innerHTML = data.online;
-      const li1 = document.createElement('li');
-      li1.innerHTML = data.msg;
-      messagesEl.appendChild(li1);
+      {#presenceEl.innerHTML = data.online;#}
+      {#const li1 = document.createElement('li');#}
+      {#li1.innerHTML = data.msg;#}
+      {#messagesEl.appendChild(li1);#}
       data.users.forEach(user => {
         const li2 = document.createElement("li");
         li2.classList.add("on-us")

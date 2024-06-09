@@ -4,14 +4,57 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.4/css/bulma.min.css">
     <title>Create Room</title>
 </head>
 <body>
-    <h2>Create Room</h2>
+<style>
+    
+    p {
+        display: flex;
+        flex-direction:column;
+        width: 30%;
+    }
+    .button{
+        margin-top: 20px;
+    }
+    .messages {
+        color: red;
+    }
+  </style>  
+
+
+  <div class="container">
+    <section class="section">
+        <h1 class="title">Создать комнату</h1>
     <form method="post">
-        {% csrf_token %}
-        {{ form.as_p }}
-        <button type="submit">Create Room</button>
+    {% csrf_token %}
+        <p>
+    <label for="id_name">Название:</label>
+    <input type="text" name="name" maxlength="100" required id="id_name">
+            {% if messages %}
+    <ul class="messages">
+        {% for message in messages %}
+            <li class="{{ message.tags }}">{{ message }}</li>
+        {% endfor %}
+    </ul>
+{% endif %}
+    
+    
+  </p>
+
+  
+  <p>
+    <label for="id_players_count">Количество игроков:</label>
+    <input type="number" name="players_count" value="2" min="2" max="4" required id="id_players_count">
+    
+    
+      
+    
+  </p>
+        <button class="button" type="submit">Создать</button>
     </form>
+    </section>
+  </div>
 </body>
 </html>

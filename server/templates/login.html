@@ -8,14 +8,36 @@
 </head>
 
 <body>
+<style>
+    
+    label {
+        display: inline-block;
+        min-width: 70px;
+    }
+  </style>  
   <div class="container">
     <section class="section">
-        <h1 class="title">Login</h1>
-      <form action="." method="post">
-        {{form.as_p}}
-        {% csrf_token %}
+        <h1 class="title">Вход</h1>
+        <form action="." method="post">
+            {% csrf_token %}
+        <p>
+    <label for="id_username">Имя:</label>
+    <input type="text" name="username" autofocus autocapitalize="none" autocomplete="username" maxlength="150" required id="id_username">
+    
+    
+  </p>
+
+  
+  <p>
+    <label for="id_password">Пароль:</label>
+    <input type="password" name="password" autocomplete="current-password" required id="id_password">
+    
+    
+      
+    
+  </p>
         <br>
-        <button class="button">Login</button>
+        <button class="button">войти</button>
       </form>
     </section>
   </div>
