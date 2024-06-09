@@ -26,7 +26,7 @@ SECRET_KEY = "django-insecure-pe5&vf1-ph23dr*q+za-(hglrqkeo7emn0e8t^mgld$(l+wsd^
 DEBUG = True
 
 ALLOWED_HOSTS = ['*']
-CSRF_TRUSTED_ORIGINS = ['http://92.118.170.121', 'http://game.ai-poly.online', 'http://ai-poly.online']
+CSRF_TRUSTED_ORIGINS = ['http://92.118.170.121', 'http://game.ai-poly.online', 'http://ai-poly.online',]
 
 
 # Application definition
