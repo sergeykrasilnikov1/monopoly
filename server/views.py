@@ -114,6 +114,7 @@ class CellViewSet(viewsets.ModelViewSet):
     #     return Response(serializer.data)
 
 
+
 class UserLoginView(LoginView):
     template_name = 'login.html'
     form_class = LoginForm
