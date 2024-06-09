@@ -22,6 +22,12 @@ from .forms import LoginForm, UserRegistrationForm
 from django.shortcuts import render, redirect
 from .forms import RoomCreateForm
 from django.contrib import messages
+from django.shortcuts import render, redirect
+from django.contrib.auth.decorators import login_required
+from .forms import ProfileUpdateForm
+
+
+
 User = get_user_model()
 
 monopoly = {
@@ -51,6 +57,11 @@ class RoomDetailView(DetailView):
     slug_field = 'name'  # Указываем поле, которое будет использоваться для идентификации объекта
     slug_url_kwarg = 'name'  # Указываем название аргумента в URL
 
+    # def get_context_data(self, **kwargs):
+    #     context = super().get_context_data(**kwargs)
+    #     players = User.objects.filter(room = context["room"]).order_by('color')
+    #     context['players'] = players
+    #     return context
 
 def room(request, room_name):
     return render(request, 'room.html', {
@@ -112,6 +123,7 @@ class CellViewSet(viewsets.ModelViewSet):
     #     cell = Cell.objects.filter(room=room1, pos=pos)[0]
     #     serializer = CellSerializer(cell)
     #     return Response(serializer.data)
+
 
 
 class UserLoginView(LoginView):
@@ -389,7 +401,16 @@ def deal(request):
 
 
 
-
+@login_required
+def profile_update(request):
+    if request.method == 'POST':
+        form = ProfileUpdateForm(request.POST, request.FILES, instance=request.user)
+        if form.is_valid():
+            form.save()
+            return redirect('../')
+    else:
+        form = ProfileUpdateForm(instance=request.user)
+    return render(request, 'profile_update.html', {'form': form})
 
 
 def create_room(request):

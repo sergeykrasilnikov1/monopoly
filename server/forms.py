@@ -43,3 +43,14 @@ class UserProfileForm(UserChangeForm):
         model = User
         fields = ('first_name', 'last_name', 'image', 'username', 'email')
 
+
+
+class ProfileUpdateForm(forms.ModelForm):
+    class Meta:
+        model = User
+        fields = ['username', 'image']
+
+    def __init__(self, *args, **kwargs):
+        super(ProfileUpdateForm, self).__init__(*args, **kwargs)
+        self.fields['username'].required = True
+        self.fields['image'].required = False

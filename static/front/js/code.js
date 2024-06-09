@@ -452,6 +452,7 @@ chatSocket.onopen = function(event) {
     .then(data => {
         for (let i in data) {
             let player = data[i]
+            if (player.image) document.querySelectorAll('.avatar')[i].src = player.image
             if (!player.lose){
                 in_prison = player.in_prison
                 if (in_prison) document.querySelector('.prison-buy').style.display = 'block';
@@ -1679,8 +1680,8 @@ function getRandomInt(min, max) {
 
 document.getElementById('rollButton').addEventListener('click', function() {
     document.querySelector('.menu').style.display = 'none'
-    // const dices =[getRandomInt(1,6), getRandomInt(1,6)]
-    const dices =[30, 0]
+    const dices =[getRandomInt(1,6), getRandomInt(1,6)]
+    // const dices =[30, 0]
     // [getRandomInt(1,6), getRandomInt(1,6)]
     if (!in_prison || (in_prison && dices[0]===dices[1]) || count_roll_in_prison===3) {
             if (in_prison && dices[0]===dices[1]) {
@@ -2087,6 +2088,7 @@ function users_update() {
             let player = document.getElementById(`player${i}`)
             player.children[1].innerText = data[i].username
             player.children[2].innerText = data[i].active
+            player.children[0].children[0].src = data[i].image
         }
     }).catch(error => {
         console.error('Error:', error);

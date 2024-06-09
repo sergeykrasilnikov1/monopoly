@@ -4,7 +4,7 @@ from . import views
 from django.contrib.auth.views import LoginView, LogoutView
 from django.urls import path, include
 from rest_framework.routers import DefaultRouter
-from .views import PlayerViewSet, RoomViewSet, CellViewSet, RoomlListView, RoomDetailView
+from .views import PlayerViewSet, RoomViewSet, CellViewSet, RoomlListView, RoomDetailView, profile_update
 from . import consumers
 
 router = DefaultRouter()
@@ -13,6 +13,7 @@ router.register(r'rooms', RoomViewSet, basename='room')
 router.register(r'cells', CellViewSet, basename='cell')
 urlpatterns = [
     # path('test/', views.test, name='test'),
+    path('profile/', profile_update, name='profile_update'),
     path('create-room/', views.create_room, name='create_room'),
     path('game/pay_rent/', views.pay_rent, name='pay_rent'),
     path('game/end_round/', views.end_round, name='end_round'),
