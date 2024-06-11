@@ -4,6 +4,7 @@ setInterval(updateGameTime, 1000);
 let room_name = window.location.href.split('/')[4]
 let in_prison = false
 const colors = ['#ff5c77', '#0fff83', '#66ffff', '#ba66ff', "#ffc766"]
+const transparentColors = ['#ffd8df', '#b8ffda', '#bbffff', '#e4c4ff', "#ffe8c1"]
 let players_positions = [1,1,1,1,1]
 let current_player = 0
 let player_number
@@ -524,7 +525,7 @@ chatSocket.onopen = function(event) {
                 cell.children[1].children[0].children[2].children[0].children[2].children[3].children[1].innerText = Math.round(250 * data_cell.pos/3 / 100) * 100;
 
                 cell.children[0].innerText = data[i].name
-                // cell.querySelector('.price').style.background = colors[data_cell.color]
+                cell.style.background = transparentColors[data_cell.color]
                 cell.querySelector('.price').style.background = colors[data_cell.color];
                 cell.title = data_cell.color !== 10 ? data_cell.color : ""
                 cell.children[1].children[1].children[0].innerText = data_cell.current_cost
@@ -762,7 +763,7 @@ chatSocket.onmessage = (event) => {
     }
      else if (data.type==='unpawn') {
          const cell = document.getElementById(`cell${data.cell}`);
-        //  cell.querySelector('.price').style.background =  colors[current_player]
+         cell.style.background = transparentColors[data_cell.color];
          cell.querySelector('.price').style.background = colors[data_cell.color];
          cell.children[1].children[3].remove()
         update_cell(data.cell)
@@ -901,6 +902,7 @@ chatSocket.onmessage = (event) => {
 
          data.my_companies.forEach(id => {
                 let cell = document.getElementById(`cell${id}`)
+                cell.style.background = transparentColors[data.enemy]
                 cell.querySelector('.price').style.background = colors[data.enemy]
                 cell.title = data.enemy
                 if (player_number===parseInt(data.enemy)) {
@@ -912,6 +914,7 @@ chatSocket.onmessage = (event) => {
             })
         data.enemy_companies.forEach(id => {
                 let cell = document.getElementById(id)
+                cell.style.background = transparentColors[data.player]
                 cell.querySelector('.price').style.background = colors[data.player]
                 cell.title = data.player
                 if (player_number===parseInt(data.player)) {
@@ -967,10 +970,12 @@ function view_for_buy_company(cell_pos, target) {
         if (player_number===parseInt(target)) {
                     companies.push(parseInt(id.slice(4)))
                 }
+        cell.style.background = transparentColors[target];
         cell.querySelector('.price').style.background = colors[target];
         cell.title = `${target}`
     }
     else {
+        cell.style.background = transparentColors[current_player];
         cell.querySelector('.price').style.background = colors[current_player];
         cell.title = `${current_player}`
     }
