@@ -71,6 +71,18 @@
                 </div>
             </div>
             {% endif %}
+        {% if room.players_count > 4 %}
+             <div class="player" id="player4">
+            <div class="avatar-frame"> <img class="avatar" src="{% if request.user.image %} {{ request.user.image.url }} {% else %} ../../static/front/images/images.jpeg {% endif %}" alt="Avatar"> </div>
+            <span class="player-username">{{ player }}</span>
+            <span class="player-money">{{ player.active }}</span>
+            <span></span>
+             <div class="player-popup">
+                    <button class="player-popup-btn">Сделка</button>
+                    <button class="player-popup-btn">Банкротство</button>
+                </div>
+            </div>
+            {% endif %}
 {#            {% for player in room.user_set.all %}#}
 {#            <div class="player" id="player{{ player.color }}">#}
 {#            <div class="avatar-frame"> <img class="avatar" src="../../static/front/images/images.jpeg" alt="Avatar"> </div>#}
@@ -84,9 +96,17 @@
         <div class="game-field">
         <div class="chip" id="chip1"></div>
     <div class="chip" id="chip2" style="left: 3.2vw"></div>
+            {% if room.players_count > 2 %} 
     <div class="chip" id="chip3" style="left: 3.3vw; top: 3.2vw"></div>
+            {% endif %}
+        
+        {% if room.players_count > 3 %}
     <div class="chip" id="chip4" style="top: 3.3vw"></div>
-	<div name='Пятёрочка' class="div1 special-cell" id="cell0" style="left: 11px; top: 14px; border: 1px solid rgba(0, 0, 0, 0.75);">
+        {% endif %}
+        {% if room.players_count > 4 %}
+    <div class="chip" id="chip5" style="top: 1.7vw; left: 1.7vw"></div>
+        {% endif %}
+	<div  class="div1 special-cell" id="cell0" style="left: 11px; top: 14px; border: 1px solid rgba(0, 0, 0, 0.75); background-image: url('../../static/front/images/roskosmos.png'); background-size: contain">
         <span class="text0" style="top: 21px; left: 6px; font-size: 12px; line-height: 14px;"></span>
   </div>
 	<div class="div1" id="cell1" style=" background-color: white; left: 66px; top:14px; border: 1px solid rgba(0, 0, 0, 0.75);">

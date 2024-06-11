@@ -781,14 +781,14 @@ chatSocket.onmessage = (event) => {
              if (auction_players.length===1 && data.auction_players_count>=players_count-1) {
                  chatSocket.send(JSON.stringify({
                     'type':'chat_message',
-                    'message':`buy ${auction_players[0]}`,
+                    'message':`В аукционе победил ${auction_players[0]}`,
                     'next_player':count_doubles===0,}));
                  auction_buy(data.price, auction_players[0], data.cell)
              }
              else if (auction_players.length===0) {
                  chatSocket.send(JSON.stringify({
                     'type':'chat_message',
-                    'message':`nobody buy`,
+                    'message':`Все отказались участвовать в аукционе`,
                     'next_player':count_doubles===0,}));
              }
              else {
@@ -811,7 +811,7 @@ chatSocket.onmessage = (event) => {
                 auction_buy(data.price, auction_players[0], data.cell)
                 chatSocket.send(JSON.stringify({
                     'type':'chat_message',
-                    'message':`buy ${auction_players[0]}`,
+                    'message':`В аукционе победил ${auction_players[0]}`,
                     'next_player': count_doubles===0,}));
                 return
             }
@@ -1435,6 +1435,9 @@ function openModalDeal() {
                 get_cell(parseInt(this.id.slice(4))).then(data=> {
                      name.innerText = data.name
                     price.innerText = data.buy_cost
+                    if (data.pos>20 && data.pos<30) {
+                        div.style.backgroundImage = this.children[1].style.backgroundImage.replace('.png', ' rotated.png')
+                    }
                     // container.appendChild(name)
                     container.appendChild(price)
                     container_small.appendChild(div)
@@ -1465,6 +1468,7 @@ function openModalDeal() {
                 const container_small = document.createElement("div")
                 container_small.style.display = 'flex'
                 div.style.backgroundImage = this.children[1].style.backgroundImage.replace(' rotated', '')
+
                 div.style.height  ='45px'
                 div.style.width  ='200px'
                 div.style.backgroundSize = 'contain'
@@ -1473,6 +1477,9 @@ function openModalDeal() {
                 if (!choosen_company2.includes(this)) {
                      name.innerText = data.name
                     price.innerText = data.buy_cost
+                    if (data.pos>20 && data.pos<30) {
+                        div.style.backgroundImage = this.children[1].style.backgroundImage.replace('.png', ' rotated.png')
+                    }
                     // container.appendChild(name)
                     container.appendChild(price)
                     container_small.appendChild(div)
@@ -1680,7 +1687,10 @@ function getRandomInt(min, max) {
 
 document.getElementById('rollButton').addEventListener('click', function() {
     document.querySelector('.menu').style.display = 'none'
-    const dices =[getRandomInt(1,6), getRandomInt(1,6)]
+    let dices =[getRandomInt(1,6), getRandomInt(1,6)]
+    while (players_positions.includes(players_positions[current_player]+dices[1]+dices[0])) {
+        dices =[getRandomInt(1,6), getRandomInt(1,6)]
+    }
     // const dices =[30, 0]
     // [getRandomInt(1,6), getRandomInt(1,6)]
     if (!in_prison || (in_prison && dices[0]===dices[1]) || count_roll_in_prison===3) {
@@ -2088,7 +2098,7 @@ function users_update() {
             let player = document.getElementById(`player${i}`)
             player.children[1].innerText = data[i].username
             player.children[2].innerText = data[i].active
-            player.children[0].children[0].src = data[i].image
+            if (data[i].image) player.children[0].children[0].src = data[i].image
         }
     }).catch(error => {
         console.error('Error:', error);

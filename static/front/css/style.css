@@ -1,16 +1,18 @@
 .chip {
-    width: 3vw;
-    height: 3vw;
+    width: 2.5vw;
+    height: 2.5vw;
     border-radius: 50%;
     position: absolute;
     z-index: 1;
     pointer-events: none;
+    border: 2px solid black;
 }
 
 #chip1 { background-color: red; }
 #chip2 { background-color: #09ce09; }
 #chip3 { background-color: blue; }
 #chip4 { background-color: yellow; }
+#chip4 { background-color: pink; }
 
 body {
     background-color: #262c2f;
@@ -132,7 +134,7 @@ body {
   .players {
     display: flex;
     flex-direction: column;
-    margin-right: 100px;
+    margin-right: 10vw;
   }
 
   .player {
@@ -637,6 +639,10 @@ body {
 
 #player3{
     background-color: yellow;
+}
+
+#player4{
+    background-color: pink;
 }
 
 input:focus {
