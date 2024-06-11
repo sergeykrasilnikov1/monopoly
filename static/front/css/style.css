@@ -2,17 +2,17 @@
     width: 2.5vw;
     height: 2.5vw;
     border-radius: 50%;
-    border: 2px solid black;
+    border: 1px solid rgba(0, 0, 0, 0.2);
     position: absolute;
     z-index: 1;
     pointer-events: none;
 }
 
-#chip1 { background-color: #ff5c77; }
-#chip2 { background-color: #0fff83; }
-#chip3 { background-color: #66ffff; }
-#chip4 { background-color: #ba66ff; }
-#chip5 { background-color: #ffc766; }
+#chip1 { background-color: #ff5c77dd; }
+#chip2 { background-color: #0fff83dd; }
+#chip3 { background-color: #66ffffdd; }
+#chip4 { background-color: #ba66ffdd; }
+#chip5 { background-color: #ffc766dd; }
 
 body {
     background-color: #262c2f;

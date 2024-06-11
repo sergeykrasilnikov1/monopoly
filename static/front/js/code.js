@@ -3,7 +3,7 @@
 setInterval(updateGameTime, 1000);
 let room_name = window.location.href.split('/')[4]
 let in_prison = false
-const colors = ['rgba(255, 0, 0, 0.5)', 'green', 'blue', 'yellow', "pink"]
+const colors = ['#ff5c77', '#0fff83', '#66ffff', '#ba66ff', "#ffc766"]
 let players_positions = [1,1,1,1,1]
 let current_player = 0
 let player_number
