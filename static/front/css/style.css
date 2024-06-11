@@ -1,7 +1,8 @@
 .chip {
-    width: 3vw;
-    height: 3vw;
+    width: 2.5vw;
+    height: 2.5vw;
     border-radius: 50%;
+    border: 2px solid black;
     position: absolute;
     z-index: 1;
     pointer-events: none;
