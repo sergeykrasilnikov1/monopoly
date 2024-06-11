@@ -15,19 +15,19 @@
 #chip5 { background-color: #ffc766dd; }
 
 .pink {
-background-color: #ff788f;
+background-color: #ff4c5b;
 }
 
 .red {
-    background-color: #da4553;
+    background-color: #ff0000;
 }
 
 .yellow {
-    background-color: #8cc152;
+    background-color: #dd0;
 }
 
 .aqua {
-   background-color: #37bc9d;
+   background-color: #0d0;
 }
 
 .black {
@@ -35,11 +35,11 @@ background-color: #ff788f;
 }
 
 .blue {
-    background-color: #4b89dc;
+    background-color: #00d;
 }
 
 .orange {
-    background-color: #ffb631;
+    background-color: #f5770a;
 }
 
 .grey {
@@ -47,11 +47,11 @@ background-color: #ff788f;
 }
 
 .purple {
-    background-color: #967bdc;
+    background-color: #f0f;
 }
 
 .aquamarine {
- background-color: #7fb7ff;
+ background-color: #0ea;
 }
 
 body {
@@ -66,8 +66,8 @@ body {
     color: white;
     font-size: 1vw !important;
     font-family: 'Open Sans',tahoma,arial,sans-serif;;
-    /*text-shadow:*/
-    /*    0px -1px 1px rgba(0, 0, 0, 1);*/
+    text-shadow:
+       0px 0px 2px rgba(0, 0, 0);
          /*1px -1px 1px rgba(0, 0, 0, 0.2),*/
         /*-1px  1px 1px rgba(0, 0, 0, 0.2),*/
          /*1px  1px 1px rgba(0, 0, 0, 0.2);*/

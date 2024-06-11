@@ -530,7 +530,7 @@ chatSocket.onopen = function(event) {
                 cell.style.background = transparentColors[data_cell.color]
 
                 cell.title = data_cell.color !== 10 ? data_cell.color : ""
-                cell.children[1].children[1].children[0].innerText = data_cell.current_cost
+                cell.children[1].children[1].children[0].innerText = data_cell.current_cost + "₽"
                 if (data_cell.stars) {
                     cell.children[1].children[2].setAttribute("data-stars", `${data_cell.stars}` )
                     cell.children[1].children[2].children[data_cell.stars-1].style.display = 'block'
@@ -1654,7 +1654,7 @@ function casino() {
             'active': parseInt(document.getElementById(`player${current_player}`).children[2].innerText) + winning,
         };
 
-        const message = winning > 0 ? `выиграл ${winning}` : 'проебал 1000';
+        const message = winning > 0 ? `выиграл ${winning}` : 'инвестировал в ВТБ 1000';
 
         chatSocket.send(JSON.stringify({
             'type': 'chat_message',
@@ -1881,21 +1881,21 @@ document.getElementById('buy').onclick = function () {
     function random_cell(nalog=false, taxi=false) {
             localStorage.setItem("random_cell_modal_visibility", 'visibility');
             let prize = [-1000,1000][getRandomInt(0,1)]
-            let message = prize > 0 ?  'получил 1000' : 'проебал 1000'
+            let message = prize > 0 ?  'получил 1000' : 'поиграл в казино на 1000 и не стал меллстроем'
             document.getElementById('myModal').style.display = 'none';
             const modal = document.getElementById('modal-pay')
             modal.style.display = 'block'
             const pay_btn = document.querySelector('.pay-btn')
             pay_btn.disabled = 1000 > parseInt(player_money.innerText)
-             pay_btn.innerText = prize > 0 ?  'получил 1000' : 'проебал 1000'
+             pay_btn.innerText = prize > 0 ?  'получил 1000' : 'прошел курс Блиновской* на 1000 *призвана иноагентом на территории РФ'
             if (nalog) {
-                message = "Заплатил налоги на 2000"
+                message = "Уплотил нологи на 2000"
                 pay_btn.innerText = "Заплатить 2000"
                 prize = -2000
                 pay_btn.disabled = 2000 > parseInt(player_money.innerText)
             }
             if (taxi){
-                message = "Прокатился на такси  за 1000"
+                message = "Решил прокатиться на бизнес такси"
                 prize = -1000
                 pay_btn.innerText = "Заплатить 1000"
             }
