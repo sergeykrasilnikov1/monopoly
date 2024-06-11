@@ -49,6 +49,7 @@ class CellViewSetTest(APITestCase):
 
 
 class BuyCompanyTest(APITestCase):
+
     def setUp(self):
         self.user = User.objects.create_user(username='testuser', password='12345')
         self.room = Room.objects.create(name="test_room")
