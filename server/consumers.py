@@ -172,7 +172,12 @@ class ChatConsumer(AsyncWebsocketConsumer):
         message_type = text_data_json.get('type')
 
         if (message_type == 'chat_message'):
-            user = self.scope['user']
+            if text_data_json.get("target"):
+                user = [i for i in self.connected_clients[self.room_name] if i.user.color == text_data_json.get('target')-1][0]
+                user = user.scope['user']
+                print(user)
+            else:
+                user = self.scope['user']
             await self.channel_layer.group_send(
                 self.room_group_name,
                 {
@@ -334,13 +339,11 @@ class ChatConsumer(AsyncWebsocketConsumer):
 
     async def chat_message(self, event):
         # Отправляем сообщение обратно через WebSocket
-        print(self.connected_clients)
-        print(self.rooms_times)
+
         time_struct = time.gmtime(time.time() - self.rooms_times.get(self.room_name, time.time()))
         hours = time_struct.tm_hour
         minutes = time_struct.tm_min
         seconds = time_struct.tm_sec
-        print(seconds, time.gmtime(time.time() - self.rooms_times.get(self.room_name, time.time())), time.time())
         await self.send(text_data=json.dumps(
             {
                 'type': 'chat_message',

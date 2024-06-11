@@ -748,7 +748,7 @@ chatSocket.onmessage = (event) => {
     }
      else if (data.type==='pawn') {
          const cell = document.getElementById(`cell${data.company}`);
-         cell.querySelector('.price').style.background =  'rgba(0, 0, 0, 0.75)'
+         cell.style.background =  'rgba(0, 0, 0, 0.75)'
             const round_wrapper = document.createElement('div')
              const round_number = document.createElement('span')
              round_wrapper.classList.add('oval')
@@ -765,8 +765,9 @@ chatSocket.onmessage = (event) => {
     }
      else if (data.type==='unpawn') {
          const cell = document.getElementById(`cell${data.cell}`);
-         cell.style.background = transparentColors[data_cell.color];
-         cell.children[1].children[3].remove()
+         cell.style.background = transparentColors[cell.title];
+         console.log()
+         cell.children[1].children[cell.children[1].children.length-1].remove()
         update_cell(data.cell)
     }
      else if (data.type==='display_window') {
@@ -785,7 +786,8 @@ chatSocket.onmessage = (event) => {
              if (auction_players.length===1 && data.auction_players_count>=players_count-1) {
                  chatSocket.send(JSON.stringify({
                     'type':'chat_message',
-                    'message':`В аукционе победил ${auction_players[0]}`,
+                     'target': auction_players[0]+1,
+                    'message':`Победил в аукционе`,
                     'next_player':count_doubles===0,}));
                  auction_buy(data.price, auction_players[0], data.cell)
              }
@@ -815,7 +817,8 @@ chatSocket.onmessage = (event) => {
                 auction_buy(data.price, auction_players[0], data.cell)
                 chatSocket.send(JSON.stringify({
                     'type':'chat_message',
-                    'message':`В аукционе победил ${auction_players[0]}`,
+                    'target': auction_players[0]+1,
+                    'message':`Победил в аукционе`,
                     'next_player': count_doubles===0,}));
                 return
             }
@@ -830,6 +833,7 @@ chatSocket.onmessage = (event) => {
             this.removeEventListener('click', up);
               btn_cancel.removeEventListener('click', cancel)
         }
+        btn_success.disabled = data.price > parseInt(player_money.innerText);
         btn_success.addEventListener('click', up)
     }
      else if (data.type==='deal_suggest') {
@@ -967,11 +971,11 @@ function view_for_monopoly(cells){
 function view_for_buy_company(cell_pos, target) {
     let cell = document.getElementById(`cell${cell_pos}`)
     if (target) {
-        if (player_number===parseInt(target)) {
-                    companies.push(parseInt(id.slice(4)))
+        if (player_number===parseInt(target-1)) {
+                    companies.push(parseInt(cell.id.slice(4)))
                 }
-        cell.style.background = transparentColors[target];
-        cell.title = `${target}`
+        cell.style.background = transparentColors[target-1];
+        cell.title = `${target-1}`
     }
     else {
         cell.style.background = transparentColors[current_player];
@@ -1002,7 +1006,8 @@ function auction_buy(price, player, cell) {
         chatSocket.send(JSON.stringify({
             'type':'buy_company',
             'cell_pos': cell,
-            'target': player}));
+            'target': player+1}));
+
         console.log(dat);
         if (check_monopoly()) {
             chatSocket.send(JSON.stringify({
@@ -1692,8 +1697,8 @@ function getRandomInt(min, max) {
 
 document.getElementById('rollButton').addEventListener('click', function() {
     document.querySelector('.menu').style.display = 'none'
-    // let dices =[getRandomInt(1,6), getRandomInt(1,6)]
-    let dices =[4, 0]
+    let dices =[getRandomInt(1,6), getRandomInt(1,6)]
+    // let dices =[36, 0]
     while (players_positions.includes(players_positions[current_player]+dices[1]+dices[0])) {
         dices =[getRandomInt(1,6), getRandomInt(1,6)]
     }
@@ -1823,8 +1828,8 @@ function choice() {
         pay_rent(cell_pos)
     }
      else if (cell_pos===20) casino();
-     else if (cell_pos===4) random_cell(nalog=true);
-     else if (cell_pos===36) random_cell(taxi=true);
+     else if (cell_pos===4) random_cell(true);
+     else if (cell_pos===36) random_cell(false, true);
        else if (cell_pos===30) {
            in_prison = true;
            let buy = document.querySelector('.prison-buy');
@@ -2149,7 +2154,7 @@ function update_cell(id) {
     .then(response => response.json())
     .then(data => {
         let cell = document.getElementById(`cell${data[0].pos}`)
-       cell.children[1].children[1].children[0].innerText = data[0].current_cost
+       cell.children[1].children[1].children[0].innerText = data[0].current_cost + "₽"
     }).catch(error => {
         console.error('Error:', error);
     });

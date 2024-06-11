@@ -128,9 +128,9 @@ body {
   }
 
   .oval {
-    width: 50px;
-  height: 30px;
-  border-radius: 15px;
+    width: 3vw;
+  height: 2vw;
+  border-radius: 1.5vw;
   background-color: #3498db;
   display: flex;
   align-items: center;
