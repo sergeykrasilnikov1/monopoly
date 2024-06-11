@@ -4,7 +4,7 @@ setInterval(updateGameTime, 1000);
 let room_name = window.location.href.split('/')[4]
 let in_prison = false
 const colors = ['#ff5c77', '#0fff83', '#66ffff', '#ba66ff', "#ffc766"]
-const transparentColors = ['#ffd8df', '#b8ffda', '#bbffff', '#e4c4ff', "#ffe8c1"]
+const transparentColors = ['#fba2ae', '#b8ffda', '#bbffff', '#e4c4ff', "#ffe8c1"]
 let players_positions = [1,1,1,1,1]
 let current_player = 0
 let player_number
@@ -25,7 +25,7 @@ let count_deals = 0
 let build_allow = true
 const monopolies = {
     0: [1,3],
-    1: [4,12,28],
+    1: [12,28],
     2: [5,15,25,35],
     3: [6,8,9],
     4: [11,13,14],
@@ -508,7 +508,9 @@ chatSocket.onopen = function(event) {
              let cell = document.getElementById(`cell${data_cell.pos}`)
             cell_names.push(data_cell.title)
             if (!cell.classList.contains("special-cell")) {
-                cell.children[1].children[0].children[0].style.backgroundColor = cell.children[1].children[1].classList[cell.children[1].children[1].classList.length - 1]
+                let styles = window.getComputedStyle(cell.children[1].children[1]);
+                cell.children[1].children[0].children[0].style.backgroundColor = styles.backgroundColor
+
                 cell.children[1].children[0].children[0].children[0].innerText = data_cell.title
                 cell.children[1].children[0].children[0].children[1].innerText = data_cell.category
 
@@ -526,7 +528,7 @@ chatSocket.onopen = function(event) {
 
                 cell.children[0].innerText = data[i].name
                 cell.style.background = transparentColors[data_cell.color]
-                cell.querySelector('.price').style.background = colors[data_cell.color];
+
                 cell.title = data_cell.color !== 10 ? data_cell.color : ""
                 cell.children[1].children[1].children[0].innerText = data_cell.current_cost
                 if (data_cell.stars) {
@@ -764,7 +766,6 @@ chatSocket.onmessage = (event) => {
      else if (data.type==='unpawn') {
          const cell = document.getElementById(`cell${data.cell}`);
          cell.style.background = transparentColors[data_cell.color];
-         cell.querySelector('.price').style.background = colors[data_cell.color];
          cell.children[1].children[3].remove()
         update_cell(data.cell)
     }
@@ -903,7 +904,7 @@ chatSocket.onmessage = (event) => {
          data.my_companies.forEach(id => {
                 let cell = document.getElementById(`cell${id}`)
                 cell.style.background = transparentColors[data.enemy]
-                cell.querySelector('.price').style.background = colors[data.enemy]
+
                 cell.title = data.enemy
                 if (player_number===parseInt(data.enemy)) {
                     companies.push(parseInt(id))
@@ -915,7 +916,6 @@ chatSocket.onmessage = (event) => {
         data.enemy_companies.forEach(id => {
                 let cell = document.getElementById(id)
                 cell.style.background = transparentColors[data.player]
-                cell.querySelector('.price').style.background = colors[data.player]
                 cell.title = data.player
                 if (player_number===parseInt(data.player)) {
                     companies.push(parseInt(id.slice(4)))
@@ -971,12 +971,10 @@ function view_for_buy_company(cell_pos, target) {
                     companies.push(parseInt(id.slice(4)))
                 }
         cell.style.background = transparentColors[target];
-        cell.querySelector('.price').style.background = colors[target];
         cell.title = `${target}`
     }
     else {
         cell.style.background = transparentColors[current_player];
-        cell.querySelector('.price').style.background = colors[current_player];
         cell.title = `${current_player}`
     }
     update_cell(cell_pos)
@@ -1694,7 +1692,8 @@ function getRandomInt(min, max) {
 
 document.getElementById('rollButton').addEventListener('click', function() {
     document.querySelector('.menu').style.display = 'none'
-    let dices =[getRandomInt(1,6), getRandomInt(1,6)]
+    // let dices =[getRandomInt(1,6), getRandomInt(1,6)]
+    let dices =[4, 0]
     while (players_positions.includes(players_positions[current_player]+dices[1]+dices[0])) {
         dices =[getRandomInt(1,6), getRandomInt(1,6)]
     }
@@ -1824,6 +1823,8 @@ function choice() {
         pay_rent(cell_pos)
     }
      else if (cell_pos===20) casino();
+     else if (cell_pos===4) random_cell(nalog=true);
+     else if (cell_pos===36) random_cell(taxi=true);
        else if (cell_pos===30) {
            in_prison = true;
            let buy = document.querySelector('.prison-buy');
@@ -1875,21 +1876,36 @@ document.getElementById('buy').onclick = function () {
             buy_company(players_positions[current_player]-1)
 
         }
-function random_cell() {
+
+
+    function random_cell(nalog=false, taxi=false) {
             localStorage.setItem("random_cell_modal_visibility", 'visibility');
+            let prize = [-1000,1000][getRandomInt(0,1)]
+            let message = prize > 0 ?  'получил 1000' : 'проебал 1000'
             document.getElementById('myModal').style.display = 'none';
             const modal = document.getElementById('modal-pay')
             modal.style.display = 'block'
             const pay_btn = document.querySelector('.pay-btn')
             pay_btn.disabled = 1000 > parseInt(player_money.innerText)
-            let prize = [-1000,1000][getRandomInt(0,1)]
+             pay_btn.innerText = prize > 0 ?  'получил 1000' : 'проебал 1000'
+            if (nalog) {
+                message = "Заплатил налоги на 2000"
+                pay_btn.innerText = "Заплатить 2000"
+                prize = -2000
+                pay_btn.disabled = 2000 > parseInt(player_money.innerText)
+            }
+            if (taxi){
+                message = "Прокатился на такси  за 1000"
+                prize = -1000
+                pay_btn.innerText = "Заплатить 1000"
+            }
     function pay_click() {
                 localStorage.setItem("random_cell_modal_visibility", 'hidden');
                 modal.style.display = 'none'
      let data = {
                 'active': parseInt(document.getElementById(`player${current_player}`).children[2].innerText)+prize,
             };
-            let message = prize > 0 ?  'получил 1000' : 'проебал 1000'
+
             modal.children[0].children[0].innerText = message
             chatSocket.send(JSON.stringify({
             'type':'chat_message',
@@ -1914,6 +1930,7 @@ function random_cell() {
     }
     pay_btn.addEventListener('click', pay_click)
 }
+
 
 function buy_company(cell_pos) {
     document.querySelector('.menu').style.display = player_number===current_player ? 'block' : 'none'
