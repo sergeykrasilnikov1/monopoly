@@ -7,11 +7,11 @@
     pointer-events: none;
 }
 
-#chip1 { background-color: #ff5c77aa; }
-#chip2 { background-color: #0fff83aa; }
-#chip3 { background-color: #66ffffaa; }
-#chip4 { background-color: #ba66ffaa; }
-#chip5 { background-color: #ffc766aa; }
+#chip1 { background-color: #ff5c77; }
+#chip2 { background-color: #0fff83; }
+#chip3 { background-color: #66ffff; }
+#chip4 { background-color: #ba66ff; }
+#chip5 { background-color: #ffc766; }
 
 body {
     background-color: #262c2f;
@@ -354,7 +354,7 @@ body {
 
     position: absolute;
     top: -18.5%;
-    background-color: wheat;
+    background-color: black;
     justify-content: center;
     align-items: center;
     color: #000;
@@ -594,23 +594,23 @@ body {
 }
 
 #player0{
-    background-color: #ff5c77aa;
+    background-color: #ff5c77;
 }
 
 #player1{
-    background-color: #0fff83aa;
+    background-color: #0fff83;
 }
 
 #player2{
-    background-color: #66ffffaa;
+    background-color: #66ffff;
 }
 
 #player3{
-    background-color: #ba66ffaa;
+    background-color: #ba66ff;
 }
 
 #player4{
-    background-color: #ffc766aa;
+    background-color: #ffc766;
 }
 
 input:focus {

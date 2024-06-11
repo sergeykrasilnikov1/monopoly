@@ -391,7 +391,7 @@ function endRound() {
                  if(rounds_remained) cell.children[1].children[2].children[0].innerText = rounds_remained
                 if (rounds_remained===1) {
                     cell.title = ''
-                    cell.style.background = 'white'
+                    cell.querySelector('.price').style.background = 'white'
                     cell.children[1].removeChild(cell.children[1].children[2])
                     cell.children[1].children[1].children[0].innerText = data_cell.buy_cost
                     if (player_number===current_player) chatSocket.send(JSON.stringify({
@@ -524,7 +524,8 @@ chatSocket.onopen = function(event) {
                 cell.children[1].children[0].children[2].children[0].children[2].children[3].children[1].innerText = Math.round(250 * data_cell.pos/3 / 100) * 100;
 
                 cell.children[0].innerText = data[i].name
-                cell.style.background = colors[data_cell.color]
+                // cell.querySelector('.price').style.background = colors[data_cell.color]
+                cell.querySelector('.price').style.background = colors[data_cell.color];
                 cell.title = data_cell.color !== 10 ? data_cell.color : ""
                 cell.children[1].children[1].children[0].innerText = data_cell.current_cost
                 if (data_cell.stars) {
@@ -533,7 +534,7 @@ chatSocket.onopen = function(event) {
                 }
                  if (data_cell.pawn_rounds_remaining) {
                         cell.children[1].setAttribute("data-pawn", `1` )
-                        cell.style.background =  'rgba(0, 0, 0, 0.75)'
+                        cell.querySelector('.price').style.background =  'rgba(0, 0, 0, 0.75)'
                         const round_wrapper = document.createElement('div')
                          const round_number = document.createElement('span')
                          round_wrapper.classList.add('oval')
@@ -694,7 +695,7 @@ chatSocket.onmessage = (event) => {
         players_count--
         companies.forEach(function (pos){
         const cell = document.getElementById(`cell${pos}`)
-        cell.style.background = 'white'
+        cell.querySelector('.price').style.background = 'white'
         cell.title = ''
         get_cell(pos).then(data => {
              cell.children[1].children[1].children[0].innerText = data.buy_cost
@@ -744,7 +745,7 @@ chatSocket.onmessage = (event) => {
     }
      else if (data.type==='pawn') {
          const cell = document.getElementById(`cell${data.company}`);
-         cell.style.background =  'rgba(0, 0, 0, 0.75)'
+         cell.querySelector('.price').style.background =  'rgba(0, 0, 0, 0.75)'
             const round_wrapper = document.createElement('div')
              const round_number = document.createElement('span')
              round_wrapper.classList.add('oval')
@@ -761,7 +762,8 @@ chatSocket.onmessage = (event) => {
     }
      else if (data.type==='unpawn') {
          const cell = document.getElementById(`cell${data.cell}`);
-         cell.style.background =  colors[current_player]
+        //  cell.querySelector('.price').style.background =  colors[current_player]
+         cell.querySelector('.price').style.background = colors[data_cell.color];
          cell.children[1].children[3].remove()
         update_cell(data.cell)
     }
@@ -899,7 +901,7 @@ chatSocket.onmessage = (event) => {
 
          data.my_companies.forEach(id => {
                 let cell = document.getElementById(`cell${id}`)
-                cell.style.background = colors[data.enemy]
+                cell.querySelector('.price').style.background = colors[data.enemy]
                 cell.title = data.enemy
                 if (player_number===parseInt(data.enemy)) {
                     companies.push(parseInt(id))
@@ -910,7 +912,7 @@ chatSocket.onmessage = (event) => {
             })
         data.enemy_companies.forEach(id => {
                 let cell = document.getElementById(id)
-                cell.style.background = colors[data.player]
+                cell.querySelector('.price').style.background = colors[data.player]
                 cell.title = data.player
                 if (player_number===parseInt(data.player)) {
                     companies.push(parseInt(id.slice(4)))
@@ -965,11 +967,11 @@ function view_for_buy_company(cell_pos, target) {
         if (player_number===parseInt(target)) {
                     companies.push(parseInt(id.slice(4)))
                 }
-        cell.style.background = colors[target];
+        cell.querySelector('.price').style.background = colors[target];
         cell.title = `${target}`
     }
     else {
-        cell.style.background = colors[current_player];
+        cell.querySelector('.price').style.background = colors[current_player];
         cell.title = `${current_player}`
     }
     update_cell(cell_pos)
