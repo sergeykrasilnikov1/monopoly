@@ -7,10 +7,11 @@
     pointer-events: none;
 }
 
-#chip1 { background-color: red; }
-#chip2 { background-color: #09ce09; }
-#chip3 { background-color: blue; }
-#chip4 { background-color: yellow; }
+#chip1 { background-color: #ff5c77aa; }
+#chip2 { background-color: #0fff83aa; }
+#chip3 { background-color: #66ffffaa; }
+#chip4 { background-color: #ba66ffaa; }
+#chip5 { background-color: #ffc766aa; }
 
 body {
     background-color: #262c2f;
@@ -356,6 +357,7 @@ body {
     background-color: wheat;
     justify-content: center;
     align-items: center;
+    color: #000;
 }
 
 .price-left {
@@ -376,40 +378,8 @@ body {
     top: 100%;
 }
 
-.pink {
-    background-color: pink;
-}
-
-.red {
-    background-color: red;
-}
-
-.yellow {
-    background-color: yellow;
-}
-
-.aqua {
-    background-color: aqua;
-}
-
-.blue {
-    background-color: blue;
-}
-
-.green {
-    background-color: green;
-}
-
-.grey {
-    background-color: grey;
-}
-
-.purple {
-    background-color: purple;
-}
-
-.aquamarine {
-    background-color: aquamarine;
+.white{
+    background-color: black;
 }
 
 .dices-wrapper {
@@ -624,19 +594,23 @@ body {
 }
 
 #player0{
-    background-color: red;
+    background-color: #ff5c77aa;
 }
 
 #player1{
-    background-color: green;
+    background-color: #0fff83aa;
 }
 
 #player2{
-    background-color: blue;
+    background-color: #66ffffaa;
 }
 
 #player3{
-    background-color: yellow;
+    background-color: #ba66ffaa;
+}
+
+#player4{
+    background-color: #ffc766aa;
 }
 
 input:focus {
