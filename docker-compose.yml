@@ -5,7 +5,6 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-#    image: sergeniy/monopoly-web:latest
     command: >
       sh -c "python manage.py makemigrations &&
             python manage.py migrate &&
@@ -14,14 +13,8 @@ services:
       - 8000:8000
     restart: always
     container_name: server3
+    volumes:
+      - ./db.sqlite3
 
-
-
-#  nginx:
-#    image: nginx:latest
-#    volumes:
-#      - ./nginx.conf:/etc/nginx/conf.d/default.conf
-#    ports:
-#      - 80:80
-#    depends_on:
-#      - web
+volumes:
+  db_data:
